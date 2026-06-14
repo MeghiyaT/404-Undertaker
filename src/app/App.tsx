@@ -1,0 +1,30 @@
+import { SiteNav } from './components/SiteNav'
+import { ArchivePanel } from '../features/archive/ArchivePanel'
+import { PreservePanel } from '../features/preserve/PreservePanel'
+
+export function App() {
+  return (
+    <div className="min-h-screen overflow-x-hidden bg-undertaker-black text-bone">
+      <div className="absolute inset-0 -z-0 bg-[radial-gradient(circle_at_top_left,rgba(216,185,109,0.12),transparent_34rem),linear-gradient(180deg,rgba(244,239,229,0.04),transparent_22rem)]" />
+      <div className="relative z-10 mx-auto flex min-h-screen w-full max-w-6xl flex-col px-5 sm:px-8">
+        <SiteNav />
+        <main className="flex flex-1 flex-col gap-20 pb-16 pt-14 sm:gap-24 sm:pt-20">
+          <section className="max-w-3xl">
+            <p className="mb-4 text-xs uppercase tracking-[0.3em] text-candle sm:text-sm">
+              Memento mori for the web
+            </p>
+            <h1 className="text-4xl font-semibold leading-tight text-bone sm:text-7xl">
+              404 Undertaker
+            </h1>
+            <p className="mt-6 max-w-[20rem] text-base leading-7 text-ash sm:max-w-2xl sm:text-lg sm:leading-8">
+              Preserve what fails. Archive what fades. Keep every vanished path
+              marked with a quiet record.
+            </p>
+          </section>
+          <PreservePanel />
+          <ArchivePanel />
+        </main>
+      </div>
+    </div>
+  )
+}
