@@ -35,7 +35,6 @@ async function uploadFileWithLighthouse(file: File) {
     body: formData,
     headers: {
       Authorization: `Bearer ${getLighthouseApiKey()}`,
-      'X-Storage-Type': 'lifetime',
     },
   })
 
