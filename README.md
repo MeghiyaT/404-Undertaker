@@ -19,6 +19,8 @@ npm run build
 
 ## Filecoin Uploads
 
-Evidence uploads use the Storacha JavaScript client, the current Web3.Storage-backed Filecoin path.
+Evidence uploads use the Lighthouse JavaScript SDK to store files on Filecoin/IPFS and return a CID.
 
-Create `.env.local` from `.env.example` and set `VITE_STORACHA_LOGIN_EMAIL`. On the first upload, confirm the Storacha email authorization. If the account has multiple spaces, also set `VITE_STORACHA_SPACE_DID`.
+Create `.env.local` from `.env.example` and set `VITE_LIGHTHOUSE_API_KEY`.
+
+For this Vite-only MVP, the key is exposed to the browser. Use a restricted or disposable key for demos; move uploads behind a serverless endpoint before production.

@@ -1,77 +1,83 @@
-type StorachaUploadResult = {
+type LighthouseUploadResponse = {
+  data?: {
+    Hash?: unknown
+    Name?: unknown
+    Size?: unknown
+  }
+}
+
+type LighthouseUploadResult = {
   cid: string
   gatewayUrl: string
-  provider: 'storacha'
+  provider: 'lighthouse'
 }
 
-type StorachaModule = typeof import('@storacha/client')
-type StorachaClient = Awaited<ReturnType<StorachaModule['create']>>
+const lighthouseGatewayUrl = 'https://gateway.lighthouse.storage/ipfs'
+const lighthouseUploadUrl =
+  'https://upload.lighthouse.storage/api/v0/add?cid-version=1'
 
-const storachaGatewayHost = 'storacha.link'
-let storachaClientPromise: Promise<StorachaClient> | undefined
+function getLighthouseApiKey() {
+  const apiKey = import.meta.env.VITE_LIGHTHOUSE_API_KEY?.trim()
+
+  if (!apiKey) {
+    throw new Error('Missing VITE_LIGHTHOUSE_API_KEY in your environment.')
+  }
+
+  return apiKey
+}
+
+async function uploadFileWithLighthouse(file: File) {
+  const formData = new FormData()
+  formData.set('file', file)
+
+  const response = await fetch(lighthouseUploadUrl, {
+    method: 'POST',
+    body: formData,
+    headers: {
+      Authorization: `Bearer ${getLighthouseApiKey()}`,
+      'X-Storage-Type': 'lifetime',
+    },
+  })
+
+  const responseBody: unknown = await response.json().catch(() => undefined)
+
+  if (!response.ok) {
+    const errorMessage =
+      typeof responseBody === 'object' &&
+      responseBody !== null &&
+      'error' in responseBody &&
+      typeof responseBody.error === 'string'
+        ? responseBody.error
+        : `Lighthouse upload failed with status ${response.status}.`
+
+    throw new Error(errorMessage)
+  }
+
+  return responseBody as LighthouseUploadResponse
+}
 
 export function getFilecoinGatewayUrl(cid: string) {
-  return `https://${cid}.ipfs.${storachaGatewayHost}`
-}
-
-function getStorachaClient() {
-  storachaClientPromise ??= import('@storacha/client').then(({ create }) =>
-    create(),
-  )
-  return storachaClientPromise
-}
-
-async function ensureStorachaSpace() {
-  const client = await getStorachaClient()
-  const configuredSpaceDid = import.meta.env.VITE_STORACHA_SPACE_DID
-  const configuredLoginEmail = import.meta.env.VITE_STORACHA_LOGIN_EMAIL
-
-  if (client.currentSpace()) {
-    return client
-  }
-
-  const existingSpace = configuredSpaceDid
-    ? client.spaces().find((space) => space.did() === configuredSpaceDid)
-    : client.spaces()[0]
-
-  if (existingSpace) {
-    await client.setCurrentSpace(existingSpace.did())
-    return client
-  }
-
-  if (configuredLoginEmail) {
-    await client.login(configuredLoginEmail)
-  }
-
-  const authorizedSpace = configuredSpaceDid
-    ? client.spaces().find((space) => space.did() === configuredSpaceDid)
-    : client.spaces()[0]
-
-  if (authorizedSpace) {
-    await client.setCurrentSpace(authorizedSpace.did())
-    return client
-  }
-
-  throw new Error(
-    'Storacha is not configured. Add VITE_STORACHA_LOGIN_EMAIL and optionally VITE_STORACHA_SPACE_DID, or authorize this browser agent before uploading.',
-  )
+  return `${lighthouseGatewayUrl}/${cid}`
 }
 
 export async function uploadEvidenceToFilecoin(
   file: File,
-): Promise<StorachaUploadResult> {
+): Promise<LighthouseUploadResult> {
   if (!file.size) {
     throw new Error('Choose a non-empty evidence file before uploading.')
   }
 
-  const client = await ensureStorachaSpace()
-  const cid = await client.uploadFile(file)
-  const cidString = cid.toString()
+  const uploadResponse = await uploadFileWithLighthouse(file)
+  const cid = uploadResponse.data?.Hash
+
+  if (typeof cid !== 'string' || cid.length === 0) {
+    throw new Error('Lighthouse upload completed without returning a CID.')
+  }
 
   return {
-    cid: cidString,
-    gatewayUrl: getFilecoinGatewayUrl(cidString),
-    provider: 'storacha',
+    cid,
+    gatewayUrl: getFilecoinGatewayUrl(cid),
+    provider: 'lighthouse',
   }
 }
 
