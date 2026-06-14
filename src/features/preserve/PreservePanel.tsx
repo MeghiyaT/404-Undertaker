@@ -8,19 +8,39 @@ const fieldStyles =
 
 const labelStyles = 'text-sm font-medium text-bone'
 
+type SubmissionStatus =
+  | {
+      kind: 'success'
+      message: string
+      certificateUrl: string
+    }
+  | {
+      kind: 'error'
+      message: string
+    }
+
 export function PreservePanel() {
   const [isUploading, setIsUploading] = useState(false)
+  const [submissionStatus, setSubmissionStatus] =
+    useState<SubmissionStatus>()
 
   async function handleCreateDeathCertificate(
     event: FormEvent<HTMLFormElement>,
   ) {
     event.preventDefault()
+    setSubmissionStatus(undefined)
 
     const formData = new FormData(event.currentTarget)
     const evidenceUpload = formData.get('evidenceUpload')
+    const originalUrl = String(formData.get('originalUrl') ?? '').trim()
+    const title = String(formData.get('title') ?? '').trim()
+    const note = String(formData.get('preservationNote') ?? '').trim()
 
     if (!(evidenceUpload instanceof File) || evidenceUpload.size === 0) {
-      console.error('Choose an evidence file before creating a certificate.')
+      setSubmissionStatus({
+        kind: 'error',
+        message: 'Choose an evidence file before creating a certificate.',
+      })
       return
     }
 
@@ -30,20 +50,33 @@ export function PreservePanel() {
       const upload = await uploadEvidenceToFilecoin(evidenceUpload)
       const timestamp = new Date().toISOString()
       const metadataBundle = {
-        originalUrl: String(formData.get('originalUrl') ?? ''),
-        title: String(formData.get('title') ?? ''),
-        note: String(formData.get('preservationNote') ?? ''),
+        originalUrl,
+        title,
+        note,
         timestamp,
         filecoinCid: upload.cid,
       }
       const savedCertificate = saveMetadataBundle(metadataBundle)
+      const certificateUrl = `/certificate/${savedCertificate.id}`
 
       console.log('Evidence uploaded CID:', upload.cid)
       console.log('Death certificate metadata bundle:', metadataBundle)
       console.log('Saved certificate:', savedCertificate)
-      console.log('Certificate URL:', `/certificate/${savedCertificate.id}`)
+      console.log('Certificate URL:', certificateUrl)
+      setSubmissionStatus({
+        kind: 'success',
+        message: 'Death certificate saved.',
+        certificateUrl,
+      })
     } catch (error) {
       console.error('Failed to upload evidence to Filecoin:', error)
+      setSubmissionStatus({
+        kind: 'error',
+        message:
+          error instanceof Error
+            ? error.message
+            : 'Failed to upload evidence to Filecoin.',
+      })
     } finally {
       setIsUploading(false)
     }
@@ -75,6 +108,7 @@ export function PreservePanel() {
             name="originalUrl"
             type="url"
             placeholder="https://example.com/lost-page"
+            required
             className={fieldStyles}
           />
         </div>
@@ -88,6 +122,7 @@ export function PreservePanel() {
             name="title"
             type="text"
             placeholder="Last known page title"
+            required
             className={fieldStyles}
           />
         </div>
@@ -101,6 +136,7 @@ export function PreservePanel() {
             name="preservationNote"
             rows={5}
             placeholder="Record context, provenance, or final observations."
+            required
             className={`${fieldStyles} resize-y leading-6`}
           />
         </div>
@@ -113,6 +149,7 @@ export function PreservePanel() {
             id="evidence-upload"
             name="evidenceUpload"
             type="file"
+            required
             className="mt-2 w-full cursor-pointer border border-stone bg-undertaker-black/80 text-sm text-ash outline-none transition-colors file:mr-4 file:border-0 file:bg-stone file:px-4 file:py-3 file:text-sm file:font-medium file:text-bone hover:border-candle focus:border-candle"
           />
         </div>
@@ -122,8 +159,28 @@ export function PreservePanel() {
           disabled={isUploading}
           className="mt-2 border border-candle bg-candle px-5 py-3 text-sm font-semibold text-undertaker-black transition-colors hover:bg-bone focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-candle disabled:cursor-not-allowed disabled:border-stone disabled:bg-stone disabled:text-ash"
         >
-          {isUploading ? 'Uploading Evidence...' : 'Create Death Certificate'}
+          {isUploading ? 'Creating Certificate...' : 'Create Death Certificate'}
         </button>
+        {submissionStatus ? (
+          <div
+            aria-live="polite"
+            className={`border px-4 py-3 text-sm leading-6 ${
+              submissionStatus.kind === 'success'
+                ? 'border-candle/60 bg-candle/10 text-bone'
+                : 'border-stone bg-undertaker-black/70 text-ash'
+            }`}
+          >
+            <p>{submissionStatus.message}</p>
+            {submissionStatus.kind === 'success' ? (
+              <a
+                href={submissionStatus.certificateUrl}
+                className="mt-2 inline-flex font-semibold text-candle hover:text-bone"
+              >
+                View Death Certificate
+              </a>
+            ) : null}
+          </div>
+        ) : null}
       </form>
     </section>
   )

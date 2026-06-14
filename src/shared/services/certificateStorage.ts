@@ -15,8 +15,10 @@ const certificateKeyPrefix = '404-undertaker:certificate'
 const certificatesUpdatedEvent = '404-undertaker:certificates-updated'
 
 function createCertificateId() {
-  if (crypto.randomUUID) {
-    return crypto.randomUUID()
+  const id = globalThis.crypto?.randomUUID?.()
+
+  if (id) {
+    return id
   }
 
   return `certificate-${Date.now()}-${Math.random().toString(16).slice(2)}`
@@ -27,6 +29,10 @@ function getCertificateKey(id: string) {
 }
 
 function readCertificateIds() {
+  if (!globalThis.localStorage) {
+    return []
+  }
+
   const storedIds = localStorage.getItem(certificateIndexKey)
 
   if (!storedIds) {
@@ -41,6 +47,27 @@ function readCertificateIds() {
   } catch {
     return []
   }
+}
+
+function parseSavedCertificate(value: unknown): SavedCertificate | undefined {
+  if (typeof value !== 'object' || value === null) {
+    return undefined
+  }
+
+  const candidate = value as Record<string, unknown>
+
+  if (
+    typeof candidate.id === 'string' &&
+    typeof candidate.originalUrl === 'string' &&
+    typeof candidate.title === 'string' &&
+    typeof candidate.note === 'string' &&
+    typeof candidate.timestamp === 'string' &&
+    typeof candidate.filecoinCid === 'string'
+  ) {
+    return candidate as SavedCertificate
+  }
+
+  return undefined
 }
 
 export function saveMetadataBundle(
@@ -66,6 +93,10 @@ export function saveMetadataBundle(
 export function getSavedCertificateById(
   id: string,
 ): SavedCertificate | undefined {
+  if (!globalThis.localStorage) {
+    return undefined
+  }
+
   const storedCertificate = localStorage.getItem(getCertificateKey(id))
 
   if (!storedCertificate) {
@@ -74,24 +105,10 @@ export function getSavedCertificateById(
 
   try {
     const parsedCertificate: unknown = JSON.parse(storedCertificate)
-
-    if (
-      typeof parsedCertificate === 'object' &&
-      parsedCertificate !== null &&
-      'id' in parsedCertificate &&
-      'originalUrl' in parsedCertificate &&
-      'title' in parsedCertificate &&
-      'note' in parsedCertificate &&
-      'timestamp' in parsedCertificate &&
-      'filecoinCid' in parsedCertificate
-    ) {
-      return parsedCertificate as SavedCertificate
-    }
+    return parseSavedCertificate(parsedCertificate)
   } catch {
     return undefined
   }
-
-  return undefined
 }
 
 export function getSavedCertificates() {

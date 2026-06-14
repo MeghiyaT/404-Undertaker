@@ -1,6 +1,6 @@
 const links = [
-  { label: 'Preserve', href: '#preserve' },
-  { label: 'Archive', href: '#archive' },
+  { label: 'Preserve', href: '/#preserve' },
+  { label: 'Archive', href: '/#archive' },
 ]
 
 export function SiteNav() {
