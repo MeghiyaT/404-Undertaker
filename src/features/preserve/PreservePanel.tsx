@@ -1,5 +1,6 @@
 import type { FormEvent } from 'react'
 import { useState } from 'react'
+import { saveMetadataBundle } from '../../shared/services/certificateStorage'
 import { uploadEvidenceToFilecoin } from '../../shared/services/filecoinStorage'
 
 const fieldStyles =
@@ -27,24 +28,20 @@ export function PreservePanel() {
 
     try {
       const upload = await uploadEvidenceToFilecoin(evidenceUpload)
+      const timestamp = new Date().toISOString()
       const metadataBundle = {
-        originalUrl: formData.get('originalUrl'),
-        title: formData.get('title'),
-        preservationNote: formData.get('preservationNote'),
-        evidence: {
-          cid: upload.cid,
-          gatewayUrl: upload.gatewayUrl,
-          provider: upload.provider,
-          fileName: evidenceUpload.name,
-          fileSize: evidenceUpload.size,
-          fileType: evidenceUpload.type || 'application/octet-stream',
-          lastModified: evidenceUpload.lastModified,
-        },
-        createdAt: new Date().toISOString(),
+        originalUrl: String(formData.get('originalUrl') ?? ''),
+        title: String(formData.get('title') ?? ''),
+        note: String(formData.get('preservationNote') ?? ''),
+        timestamp,
+        filecoinCid: upload.cid,
       }
+      const savedCertificate = saveMetadataBundle(metadataBundle)
 
       console.log('Evidence uploaded CID:', upload.cid)
       console.log('Death certificate metadata bundle:', metadataBundle)
+      console.log('Saved certificate:', savedCertificate)
+      console.log('Certificate URL:', `/certificate/${savedCertificate.id}`)
     } catch (error) {
       console.error('Failed to upload evidence to Filecoin:', error)
     } finally {

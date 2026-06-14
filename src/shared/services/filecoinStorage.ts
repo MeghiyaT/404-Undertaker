@@ -10,6 +10,10 @@ type StorachaClient = Awaited<ReturnType<StorachaModule['create']>>
 const storachaGatewayHost = 'storacha.link'
 let storachaClientPromise: Promise<StorachaClient> | undefined
 
+export function getFilecoinGatewayUrl(cid: string) {
+  return `https://${cid}.ipfs.${storachaGatewayHost}`
+}
+
 function getStorachaClient() {
   storachaClientPromise ??= import('@storacha/client').then(({ create }) =>
     create(),
@@ -66,7 +70,43 @@ export async function uploadEvidenceToFilecoin(
 
   return {
     cid: cidString,
-    gatewayUrl: `https://${cidString}.ipfs.${storachaGatewayHost}`,
+    gatewayUrl: getFilecoinGatewayUrl(cidString),
     provider: 'storacha',
+  }
+}
+
+export async function retrieveEvidenceFromFilecoin(cid: string) {
+  const gatewayUrl = getFilecoinGatewayUrl(cid)
+  const evidenceWindow = window.open('about:blank', '_blank')
+
+  if (evidenceWindow) {
+    evidenceWindow.opener = null
+  }
+
+  try {
+    const response = await fetch(gatewayUrl)
+
+    if (!response.ok) {
+      throw new Error(`Filecoin gateway returned ${response.status}`)
+    }
+
+    const evidenceBlob = await response.blob()
+    const evidenceUrl = URL.createObjectURL(evidenceBlob)
+
+    if (evidenceWindow) {
+      evidenceWindow.location.href = evidenceUrl
+    } else {
+      window.open(evidenceUrl, '_blank', 'noopener')
+    }
+
+    window.setTimeout(() => URL.revokeObjectURL(evidenceUrl), 60_000)
+  } catch (error) {
+    if (evidenceWindow) {
+      evidenceWindow.location.href = gatewayUrl
+    } else {
+      window.open(gatewayUrl, '_blank', 'noopener')
+    }
+
+    throw error
   }
 }
