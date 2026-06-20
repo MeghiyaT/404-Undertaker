@@ -26,33 +26,57 @@ function getLighthouseApiKey() {
   return apiKey
 }
 
-async function uploadFileWithLighthouse(file: File) {
+async function uploadFileWithLighthouse(
+  file: File,
+  onProgress?: (progress: number) => void
+): Promise<LighthouseUploadResponse> {
   const formData = new FormData()
   formData.set('file', file)
 
-  const response = await fetch(lighthouseUploadUrl, {
-    method: 'POST',
-    body: formData,
-    headers: {
-      Authorization: `Bearer ${getLighthouseApiKey()}`,
-    },
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest()
+    
+    if (onProgress) {
+      xhr.upload.addEventListener('progress', (event) => {
+        if (event.lengthComputable) {
+          // Calculate percentage from 0 to 100
+          const percentComplete = Math.round((event.loaded / event.total) * 100)
+          onProgress(percentComplete)
+        }
+      })
+    }
+
+    xhr.addEventListener('load', () => {
+      let responseBody: unknown
+      try {
+        responseBody = JSON.parse(xhr.responseText)
+      } catch (e) {
+        responseBody = undefined
+      }
+
+      if (xhr.status >= 200 && xhr.status < 300) {
+        resolve(responseBody as LighthouseUploadResponse)
+      } else {
+        const errorMessage =
+          typeof responseBody === 'object' &&
+          responseBody !== null &&
+          'error' in responseBody &&
+          typeof (responseBody as any).error === 'string'
+            ? (responseBody as any).error
+            : `Lighthouse upload failed with status ${xhr.status}.`
+        
+        reject(new Error(errorMessage))
+      }
+    })
+
+    xhr.addEventListener('error', () => {
+      reject(new Error('Network error occurred during upload.'))
+    })
+
+    xhr.open('POST', lighthouseUploadUrl)
+    xhr.setRequestHeader('Authorization', `Bearer ${getLighthouseApiKey()}`)
+    xhr.send(formData)
   })
-
-  const responseBody: unknown = await response.json().catch(() => undefined)
-
-  if (!response.ok) {
-    const errorMessage =
-      typeof responseBody === 'object' &&
-      responseBody !== null &&
-      'error' in responseBody &&
-      typeof responseBody.error === 'string'
-        ? responseBody.error
-        : `Lighthouse upload failed with status ${response.status}.`
-
-    throw new Error(errorMessage)
-  }
-
-  return responseBody as LighthouseUploadResponse
 }
 
 export function getFilecoinGatewayUrl(cid: string) {
@@ -61,12 +85,13 @@ export function getFilecoinGatewayUrl(cid: string) {
 
 export async function uploadEvidenceToFilecoin(
   file: File,
+  onProgress?: (progress: number) => void
 ): Promise<LighthouseUploadResult> {
   if (!file.size) {
     throw new Error('Choose a non-empty evidence file before uploading.')
   }
 
-  const uploadResponse = await uploadFileWithLighthouse(file)
+  const uploadResponse = await uploadFileWithLighthouse(file, onProgress)
   const cid = uploadResponse.data?.Hash
 
   if (typeof cid !== 'string' || cid.length === 0) {

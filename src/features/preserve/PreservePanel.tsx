@@ -1,5 +1,5 @@
-import type { FormEvent } from 'react'
-import { useState } from 'react'
+import type { FormEvent, DragEvent, ChangeEvent } from 'react'
+import { useState, useRef } from 'react'
 import { saveMetadataBundle } from '../../shared/services/certificateStorage'
 import { uploadEvidenceToFilecoin } from '../../shared/services/filecoinStorage'
 
@@ -21,8 +21,45 @@ type SubmissionStatus =
 
 export function PreservePanel() {
   const [isUploading, setIsUploading] = useState(false)
+  const [uploadProgress, setUploadProgress] = useState<number | null>(null)
   const [submissionStatus, setSubmissionStatus] =
     useState<SubmissionStatus>()
+  const [isDragOver, setIsDragOver] = useState(false)
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  function handleDragOver(event: DragEvent<HTMLDivElement>) {
+    event.preventDefault()
+    setIsDragOver(true)
+  }
+
+  function handleDragLeave(event: DragEvent<HTMLDivElement>) {
+    event.preventDefault()
+    setIsDragOver(false)
+  }
+
+  function handleDrop(event: DragEvent<HTMLDivElement>) {
+    event.preventDefault()
+    setIsDragOver(false)
+    const file = event.dataTransfer.files?.[0]
+    if (file) {
+      setSelectedFile(file)
+    }
+  }
+
+  function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0]
+    if (file) {
+      setSelectedFile(file)
+    }
+  }
+
+  function clearFile() {
+    setSelectedFile(null)
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''
+    }
+  }
 
   async function handleCreateDeathCertificate(
     event: FormEvent<HTMLFormElement>,
@@ -36,7 +73,9 @@ export function PreservePanel() {
     const title = String(formData.get('title') ?? '').trim()
     const note = String(formData.get('preservationNote') ?? '').trim()
 
-    if (!(evidenceUpload instanceof File) || evidenceUpload.size === 0) {
+    const fileToUpload = selectedFile || evidenceUpload
+
+    if (!(fileToUpload instanceof File) || fileToUpload.size === 0) {
       setSubmissionStatus({
         kind: 'error',
         message: 'Choose an evidence file before creating a certificate.',
@@ -45,9 +84,10 @@ export function PreservePanel() {
     }
 
     setIsUploading(true)
+    setUploadProgress(0)
 
     try {
-      const upload = await uploadEvidenceToFilecoin(evidenceUpload)
+      const upload = await uploadEvidenceToFilecoin(fileToUpload, setUploadProgress)
       const timestamp = new Date().toISOString()
       const metadataBundle = {
         originalUrl,
@@ -79,6 +119,8 @@ export function PreservePanel() {
       })
     } finally {
       setIsUploading(false)
+      setUploadProgress(null)
+      setSelectedFile(null)
     }
   }
 
@@ -145,21 +187,71 @@ export function PreservePanel() {
           <label htmlFor="evidence-upload" className={labelStyles}>
             Evidence Upload
           </label>
-          <input
-            id="evidence-upload"
-            name="evidenceUpload"
-            type="file"
-            required
-            className="mt-2 w-full cursor-pointer border border-stone bg-undertaker-black/80 text-sm text-ash outline-none transition-colors file:mr-4 file:border-0 file:bg-stone file:px-4 file:py-3 file:text-sm file:font-medium file:text-bone hover:border-candle focus:border-candle"
-          />
+          <div
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+            className={`mt-2 relative border-2 border-dashed p-6 text-center transition-colors duration-undertaker ease-undertaker ${
+              isDragOver
+                ? 'border-candle bg-candle/5'
+                : 'border-stone bg-undertaker-black/80 hover:border-ash/50'
+            }`}
+          >
+            <input
+              id="evidence-upload"
+              name="evidenceUpload"
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileChange}
+              className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
+              aria-label="Upload evidence file"
+            />
+            {selectedFile ? (
+              <div className="flex flex-col items-center justify-center gap-2">
+                <p className="text-sm font-medium text-bone">
+                  {selectedFile.name}
+                </p>
+                <p className="text-xs text-ash">
+                  {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
+                </p>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault()
+                    clearFile()
+                  }}
+                  className="mt-2 text-xs uppercase tracking-wider text-candle hover:text-bone focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-candle"
+                >
+                  Remove
+                </button>
+              </div>
+            ) : (
+              <div className="pointer-events-none flex flex-col items-center justify-center gap-2">
+                <p className="text-sm text-ash">
+                  Drag and drop a file, or click to browse
+                </p>
+                <p className="text-xs text-ash/60">Any file up to 100MB</p>
+              </div>
+            )}
+          </div>
         </div>
 
         <button
           type="submit"
-          disabled={isUploading}
-          className="mt-2 border border-candle bg-candle px-5 py-3 text-sm font-semibold text-undertaker-black transition-colors hover:bg-bone focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-candle disabled:cursor-not-allowed disabled:border-stone disabled:bg-stone disabled:text-ash"
+          disabled={isUploading || !selectedFile}
+          className="mt-2 relative overflow-hidden border border-candle bg-candle px-5 py-3 text-sm font-semibold text-undertaker-black transition-colors hover:bg-bone focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-candle disabled:cursor-not-allowed disabled:border-stone disabled:bg-stone disabled:text-ash"
         >
-          {isUploading ? 'Creating Certificate...' : 'Create Death Certificate'}
+          {isUploading && uploadProgress !== null && (
+            <div
+              className="absolute inset-y-0 left-0 bg-undertaker-black/10 transition-all duration-200"
+              style={{ width: `${uploadProgress}%` }}
+            />
+          )}
+          <span className="relative z-10">
+            {isUploading
+              ? `Uploading Evidence... ${uploadProgress ?? 0}%`
+              : 'Create Death Certificate'}
+          </span>
         </button>
         {submissionStatus ? (
           <div
