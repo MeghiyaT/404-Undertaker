@@ -82,21 +82,25 @@ export function CertificatePage({ certificateId }: CertificatePageProps) {
   }
 
   return (
-    <main className="flex flex-1 justify-center pb-16 pt-10 sm:pt-16">
-      <article className="w-full max-w-4xl border border-stone bg-grave/80">
-        <header className="border-b border-stone px-6 py-8 text-center sm:px-10">
-          <p className="text-xs uppercase tracking-[0.35em] text-candle">
-            404 Undertaker
-          </p>
-          <h1 className="mt-4 text-4xl font-semibold text-bone sm:text-6xl">
-            Death Certificate
-          </h1>
-          <p className="mt-3 text-sm uppercase tracking-[0.25em] text-ash">
-            For a departed web link
-          </p>
-        </header>
+    <main className="flex flex-1 justify-center px-4 pb-16 pt-10 sm:px-0 sm:pt-16">
+      <article className="w-full max-w-4xl certificate-engraved bg-[#13110F] shadow-2xl relative p-3 sm:p-5">
+        <div className="certificate-seal h-full w-full bg-grave/40">
+          <header className="border-b border-stone/60 px-6 py-12 text-center sm:px-12">
+            <div className="mx-auto mb-6 flex h-12 w-12 items-center justify-center border border-candle/30 rounded-full">
+              <span className="text-candle/80 font-serif italic text-lg">X</span>
+            </div>
+            <p className="text-xs uppercase tracking-[0.4em] text-candle">
+              404 Undertaker
+            </p>
+            <h1 className="mt-6 text-4xl font-serif font-medium tracking-wide text-bone sm:text-6xl">
+              Death Certificate
+            </h1>
+            <p className="mt-5 text-sm uppercase tracking-[0.3em] text-ash/80">
+              For a departed web link
+            </p>
+          </header>
 
-        <section className="grid gap-0 sm:grid-cols-[0.8fr_1.2fr]">
+          <section className="grid gap-0 sm:grid-cols-[1fr_1.5fr]">
           <div className="border-b border-stone p-6 sm:border-b-0 sm:border-r sm:p-8">
             <p className="text-xs uppercase tracking-[0.3em] text-candle">
               Certificate ID
@@ -106,47 +110,49 @@ export function CertificatePage({ certificateId }: CertificatePageProps) {
             </p>
           </div>
 
-          <dl className="divide-y divide-stone">
-            <div className="grid gap-3 p-6 sm:grid-cols-[10rem_1fr] sm:p-8">
-              <dt className="text-sm font-medium text-ash">Original URL</dt>
+          <dl className="divide-y divide-stone/60">
+            <div className="grid gap-2 p-6 sm:grid-cols-[11rem_1fr] sm:p-8 hover:bg-white/[0.01] transition-colors">
+              <dt className="text-sm font-medium uppercase tracking-wider text-ash/70">Original URL</dt>
               <dd className="break-words font-mono text-sm leading-6 text-bone">
-                {certificate.originalUrl}
+                <a href={certificate.originalUrl} target="_blank" rel="noopener noreferrer" className="hover:text-candle transition-colors underline decoration-stone underline-offset-4">
+                  {certificate.originalUrl}
+                </a>
               </dd>
             </div>
 
-            <div className="grid gap-3 p-6 sm:grid-cols-[10rem_1fr] sm:p-8">
-              <dt className="text-sm font-medium text-ash">Title</dt>
-              <dd className="text-base font-semibold text-bone">
+            <div className="grid gap-2 p-6 sm:grid-cols-[11rem_1fr] sm:p-8 hover:bg-white/[0.01] transition-colors">
+              <dt className="text-sm font-medium uppercase tracking-wider text-ash/70">Title</dt>
+              <dd className="text-lg font-serif text-bone">
                 {certificate.title || 'Untitled record'}
               </dd>
             </div>
 
-            <div className="grid gap-3 p-6 sm:grid-cols-[10rem_1fr] sm:p-8">
-              <dt className="text-sm font-medium text-ash">
+            <div className="grid gap-2 p-6 sm:grid-cols-[11rem_1fr] sm:p-8 hover:bg-white/[0.01] transition-colors">
+              <dt className="text-sm font-medium uppercase tracking-wider text-ash/70">
                 Preservation Note
               </dt>
-              <dd className="whitespace-pre-wrap text-base leading-7 text-bone">
+              <dd className="whitespace-pre-wrap text-base leading-relaxed text-ash/90 italic border-l-2 border-stone pl-4">
                 {certificate.note || 'No note entered.'}
               </dd>
             </div>
 
-            <div className="grid gap-3 p-6 sm:grid-cols-[10rem_1fr] sm:p-8">
-              <dt className="text-sm font-medium text-ash">Timestamp</dt>
-              <dd className="text-base text-bone">
+            <div className="grid gap-2 p-6 sm:grid-cols-[11rem_1fr] sm:p-8 hover:bg-white/[0.01] transition-colors">
+              <dt className="text-sm font-medium uppercase tracking-wider text-ash/70">Timestamp</dt>
+              <dd className="text-sm tracking-wide text-bone">
                 {formatTimestamp(certificate.timestamp)}
               </dd>
             </div>
 
-            <div className="grid gap-3 p-6 sm:grid-cols-[10rem_1fr] sm:p-8">
-              <dt className="text-sm font-medium text-ash">Filecoin CID</dt>
-              <dd className="break-all font-mono text-sm leading-6 text-candle">
+            <div className="grid gap-2 p-6 sm:grid-cols-[11rem_1fr] sm:p-8 hover:bg-white/[0.01] transition-colors">
+              <dt className="text-sm font-medium uppercase tracking-wider text-ash/70">Filecoin CID</dt>
+              <dd className="break-all font-mono text-sm leading-6 text-candle/80 bg-candle/5 px-2 py-1 inline-block border border-candle/10">
                 {certificate.filecoinCid}
               </dd>
             </div>
           </dl>
         </section>
 
-        <footer className="flex flex-col gap-4 border-t border-stone px-6 py-6 sm:flex-row sm:items-center sm:justify-between sm:px-8">
+        <footer className="flex flex-col gap-5 border-t border-stone/60 px-6 py-8 sm:flex-row sm:items-center sm:justify-between sm:px-10 bg-undertaker-black/20">
           <p className="max-w-xl text-sm leading-6 text-ash">
             Evidence is retrieved by CID from the Filecoin-backed IPFS gateway
             and opened in a new tab.
@@ -160,6 +166,7 @@ export function CertificatePage({ certificateId }: CertificatePageProps) {
             {isRetrieving ? 'Retrieving Evidence...' : 'Retrieve Evidence'}
           </button>
         </footer>
+        </div>
       </article>
     </main>
   )

@@ -41,15 +41,14 @@ body {
 /* Certificate Seal & Borders */
 @utility certificate-seal {
   position: relative;
-}
-
-@utility certificate-seal::after {
-  content: '';
-  position: absolute;
-  inset: -4px;
-  border: 1px solid var(--color-stone);
-  opacity: 0.5;
-  pointer-events: none;
+  &::after {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border: 1px solid var(--color-stone);
+    opacity: 0.5;
+    pointer-events: none;
+  }
 }
 
 @utility certificate-engraved {

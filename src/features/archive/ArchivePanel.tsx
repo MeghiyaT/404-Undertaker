@@ -39,26 +39,29 @@ export function ArchivePanel() {
             <a
               key={certificate.id}
               href={`/certificate/${certificate.id}`}
-              className="group flex min-h-44 flex-col justify-between border border-stone bg-grave/60 p-5 transition-colors hover:border-candle focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-candle"
+              className="group flex min-h-44 flex-col justify-between border border-stone bg-grave/60 p-5 transition-all duration-undertaker ease-undertaker hover:-translate-y-1 hover:border-candle/80 hover:bg-grave focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-candle"
             >
               <div>
-                <p className="text-xs uppercase tracking-[0.3em] text-candle">
+                <p className="text-xs uppercase tracking-[0.3em] text-candle transition-opacity duration-undertaker ease-undertaker group-hover:opacity-80">
                   Preserved
                 </p>
-                <h3 className="mt-4 line-clamp-2 text-xl font-semibold leading-tight text-bone">
+                <h3 className="mt-4 line-clamp-2 text-xl font-semibold leading-tight text-bone transition-colors duration-undertaker ease-undertaker group-hover:text-candle">
                   {certificate.title || 'Untitled record'}
                 </h3>
               </div>
-              <p className="mt-6 line-clamp-2 break-words font-mono text-sm leading-6 text-ash transition-colors group-hover:text-bone">
+              <p className="mt-6 line-clamp-2 break-words font-mono text-sm leading-6 text-ash transition-colors duration-undertaker ease-undertaker group-hover:text-bone">
                 {certificate.originalUrl || 'No original URL recorded'}
               </p>
             </a>
           ))}
         </div>
       ) : (
-        <div className="max-w-[20rem] border border-stone bg-grave/50 px-5 py-10 text-center sm:max-w-none">
-          <p className="text-lg font-semibold text-bone">
+        <div className="max-w-[20rem] border border-stone border-dashed bg-grave/30 px-5 py-12 text-center sm:max-w-none transition-colors duration-undertaker ease-undertaker hover:border-ash/50">
+          <p className="text-sm uppercase tracking-widest text-ash">
             The graveyard is empty
+          </p>
+          <p className="mt-2 text-sm text-ash/60">
+            No broken links have been preserved yet.
           </p>
         </div>
       )}

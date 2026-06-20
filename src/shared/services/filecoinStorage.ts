@@ -16,6 +16,16 @@ const lighthouseGatewayUrl = 'https://gateway.lighthouse.storage/ipfs'
 const lighthouseUploadUrl =
   'https://upload.lighthouse.storage/api/v0/add?cid-version=1'
 
+/**
+ * SECURITY NOTE: 
+ * In this Vite-only MVP, the Lighthouse API key is exposed to the browser.
+ * This is suitable for a low-risk or disposable key used for demonstrations.
+ * For production, DO NOT expose this key in the browser. Instead:
+ * 1. Create a serverless endpoint (e.g. Vercel Function, Cloudflare Worker).
+ * 2. Store the key securely in the endpoint's environment variables.
+ * 3. Have the client upload to your endpoint (or request a signed upload token),
+ *    and let the server handle the interaction with Lighthouse.
+ */
 function getLighthouseApiKey() {
   const apiKey = import.meta.env.VITE_LIGHTHOUSE_API_KEY?.trim()
 
