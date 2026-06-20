@@ -1,4 +1,5 @@
 import { SiteNav } from './components/SiteNav'
+import { useRoute } from './useRoute'
 import { ArchivePanel } from '../features/archive/ArchivePanel'
 import { CertificatePage } from '../features/certificate/CertificatePage'
 import { PreservePanel } from '../features/preserve/PreservePanel'
@@ -10,15 +11,16 @@ import { PreservePanel } from '../features/preserve/PreservePanel'
 const VALID_CERTIFICATE_ID =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$|^certificate-\d+-[0-9a-f]+$/
 
-function getCertificateIdFromPath() {
-  const match = window.location.pathname.match(/^\/certificate\/([^/]+)$/)
+function parseCertificateId(pathname: string) {
+  const match = pathname.match(/^\/certificate\/([^/]+)$/)
   if (!match) return undefined
   const id = decodeURIComponent(match[1])
   return VALID_CERTIFICATE_ID.test(id) ? id : undefined
 }
 
 export function App() {
-  const certificateId = getCertificateIdFromPath()
+  const pathname = useRoute()
+  const certificateId = parseCertificateId(pathname)
 
   return (
     <div className="min-h-screen bg-undertaker-black text-bone selection:bg-candle selection:text-undertaker-black">

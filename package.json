@@ -5,12 +5,16 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "npm install && vite build && rm -rf .vercel && mkdir -p .vercel/output/static && cp -a dist/. .vercel/output/static/ && echo '{\"version\": 3, \"routes\": [{\"handle\": \"filesystem\"}, {\"src\": \"/(.*)\", \"dest\": \"/index.html\"}]}' > .vercel/output/config.json",
+    "build": "tsc -b && vite build",
     "preview": "vite preview",
     "typecheck": "tsc -b",
     "lint": "eslint src"
   },
   "dependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@tailwindcss/vite": "^4.0.0",
     "@types/react": "^19.0.0",
@@ -18,8 +22,6 @@
     "@vitejs/plugin-react": "^5.0.0",
     "eslint": "^10.5.0",
     "eslint-plugin-react-hooks": "^7.1.1",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
     "typescript": "^5.0.0",
     "typescript-eslint": "^8.61.1",
     "vite": "^8.0.0"

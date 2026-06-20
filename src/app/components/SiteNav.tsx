@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { navigate } from '../useRoute'
 
 const links = [
   { label: 'Preserve', href: '/#preserve' },
@@ -8,11 +9,43 @@ const links = [
 export function SiteNav() {
   const [menuOpen, setMenuOpen] = useState(false)
 
+  function handleNavClick(
+    e: React.MouseEvent<HTMLAnchorElement>,
+    href: string,
+  ) {
+    const url = new URL(href, window.location.href)
+
+    // Same-page hash link → smooth scroll
+    if (url.pathname === window.location.pathname && url.hash) {
+      e.preventDefault()
+      document.querySelector(url.hash)?.scrollIntoView({ behavior: 'smooth' })
+      return
+    }
+
+    // Internal navigation → client-side route
+    if (url.origin === window.location.origin) {
+      e.preventDefault()
+      navigate(url.pathname + url.hash)
+      // If there's a hash, scroll to it after routing
+      if (url.hash) {
+        requestAnimationFrame(() => {
+          document
+            .querySelector(url.hash)
+            ?.scrollIntoView({ behavior: 'smooth' })
+        })
+      }
+    }
+  }
+
   return (
     <nav className="sticky top-0 z-50 border-b border-stone bg-undertaker-black">
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-6">
         {/* Wordmark */}
-        <a href="/" className="flex items-center gap-3 no-underline">
+        <a
+          href="/"
+          className="flex items-center gap-3 no-underline"
+          onClick={(e) => handleNavClick(e, '/')}
+        >
           <div className="flex h-8 w-8 shrink-0 items-center justify-center border border-candle">
             <span className="font-mono text-[10px] font-semibold leading-none tracking-tighter text-candle">
               404
@@ -30,13 +63,7 @@ export function SiteNav() {
               key={label}
               href={href}
               className="text-xs uppercase tracking-[0.2em] text-ash transition-colors duration-200 hover:text-candle"
-              onClick={(e) => {
-                const url = new URL(href, window.location.href)
-                if (url.pathname === window.location.pathname && url.hash) {
-                  e.preventDefault()
-                  document.querySelector(url.hash)?.scrollIntoView({ behavior: 'smooth' })
-                }
-              }}
+              onClick={(e) => handleNavClick(e, href)}
             >
               {label}
             </a>
@@ -80,11 +107,7 @@ export function SiteNav() {
               href={href}
               className="text-left text-xs uppercase tracking-[0.2em] text-ash transition-colors duration-200 hover:text-candle"
               onClick={(e) => {
-                const url = new URL(href, window.location.href)
-                if (url.pathname === window.location.pathname && url.hash) {
-                  e.preventDefault()
-                  document.querySelector(url.hash)?.scrollIntoView({ behavior: 'smooth' })
-                }
+                handleNavClick(e, href)
                 setMenuOpen(false)
               }}
             >

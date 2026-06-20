@@ -22,37 +22,13 @@ function hasErrorMessage(value: unknown): value is { error: string } {
 }
 
 const lighthouseGatewayUrl = 'https://gateway.lighthouse.storage/ipfs'
-const lighthouseUploadUrl =
-  'https://upload.lighthouse.storage/api/v0/add?cid-version=1'
 
 /**
- * TODO [S-1 — NOT RESOLVED]: Move the Lighthouse API key server-side.
- *
- * RESIDUAL RISK: The VITE_LIGHTHOUSE_API_KEY is bundled into the client JS
- * because Vite inlines all VITE_* env vars. Anyone can extract it from the
- * browser bundle and abuse your Lighthouse storage quota (upload arbitrary
- * files, exhaust limits, cause billing spikes).
- *
- * REQUIRED PRODUCTION FIX:
- * 1. Create a serverless proxy (Vercel Function, Cloudflare Worker, etc.).
- * 2. Store the key in the proxy's server-side environment variables.
- * 3. Remove the VITE_ prefix so the key is never bundled.
- * 4. Have the client POST to /api/upload; the proxy forwards to Lighthouse.
- * 5. Add rate-limiting and authentication on the proxy endpoint.
- *
- * Until then, use only a low-risk / disposable / tightly-scoped demo key.
+ * Uploads a file via our Vercel serverless proxy at /api/upload.
+ * The proxy holds the Lighthouse API key server-side so it is
+ * never bundled into the client.
  */
-function getLighthouseApiKey() {
-  const apiKey = import.meta.env.VITE_LIGHTHOUSE_API_KEY?.trim()
-
-  if (!apiKey) {
-    throw new Error('Missing VITE_LIGHTHOUSE_API_KEY in your environment.')
-  }
-
-  return apiKey
-}
-
-async function uploadFileWithLighthouse(
+async function uploadFileViaProxy(
   file: File,
   onProgress?: (progress: number) => void
 ): Promise<LighthouseUploadResponse> {
@@ -61,11 +37,10 @@ async function uploadFileWithLighthouse(
 
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest()
-    
+
     if (onProgress) {
       xhr.upload.addEventListener('progress', (event) => {
         if (event.lengthComputable) {
-          // Calculate percentage from 0 to 100
           const percentComplete = Math.round((event.loaded / event.total) * 100)
           onProgress(percentComplete)
         }
@@ -85,8 +60,8 @@ async function uploadFileWithLighthouse(
       } else {
         const errorMessage = hasErrorMessage(responseBody)
             ? responseBody.error
-            : `Lighthouse upload failed with status ${xhr.status}.`
-        
+            : `Upload failed with status ${xhr.status}.`
+
         reject(new Error(errorMessage))
       }
     })
@@ -95,8 +70,7 @@ async function uploadFileWithLighthouse(
       reject(new Error('Network error occurred during upload.'))
     })
 
-    xhr.open('POST', lighthouseUploadUrl)
-    xhr.setRequestHeader('Authorization', `Bearer ${getLighthouseApiKey()}`)
+    xhr.open('POST', '/api/upload')
     xhr.send(formData)
   })
 }
@@ -154,11 +128,11 @@ export async function uploadEvidenceToFilecoin(
 ): Promise<LighthouseUploadResult> {
   validateEvidenceFile(file)
 
-  const uploadResponse = await uploadFileWithLighthouse(file, onProgress)
+  const uploadResponse = await uploadFileViaProxy(file, onProgress)
   const cid = uploadResponse.data?.Hash
 
   if (typeof cid !== 'string' || cid.length === 0) {
-    throw new Error('Lighthouse upload completed without returning a CID.')
+    throw new Error('Upload completed without returning a CID.')
   }
 
   return {

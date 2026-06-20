@@ -1,5 +1,6 @@
 import type { FormEvent, DragEvent, ChangeEvent } from 'react'
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
+import { navigate } from '../../app/useRoute'
 import { saveMetadataBundle } from '../../shared/services/certificateStorage'
 import { uploadEvidenceToFilecoin } from '../../shared/services/filecoinStorage'
 
@@ -12,13 +13,27 @@ type SubmissionStatus =
   | { kind: 'success'; message: string; certificateUrl: string }
   | { kind: 'error'; message: string }
 
+/** Seconds to wait after a successful upload before allowing another. */
+const COOLDOWN_SECONDS = 10
+
 export function PreservePanel() {
   const [isUploading, setIsUploading] = useState(false)
   const [uploadProgress, setUploadProgress] = useState<number | null>(null)
   const [submissionStatus, setSubmissionStatus] = useState<SubmissionStatus>()
   const [isDragOver, setIsDragOver] = useState(false)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [cooldownRemaining, setCooldownRemaining] = useState(0)
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  // Tick the cooldown timer every second
+  useEffect(() => {
+    if (cooldownRemaining <= 0) return
+    const timer = window.setTimeout(
+      () => setCooldownRemaining((s) => s - 1),
+      1000,
+    )
+    return () => clearTimeout(timer)
+  }, [cooldownRemaining])
 
   function handleDragOver(event: DragEvent<HTMLDivElement>) {
     event.preventDefault()
@@ -81,6 +96,7 @@ export function PreservePanel() {
         message: 'Death certificate saved.',
         certificateUrl: `/certificate/${savedCertificate.id}`,
       })
+      setCooldownRemaining(COOLDOWN_SECONDS)
     } catch (error) {
       setSubmissionStatus({
         kind: 'error',
@@ -149,12 +165,13 @@ export function PreservePanel() {
                 </p>
               </div>
               <div className="flex w-full flex-col gap-3 sm:flex-row">
-                <a
-                  href={submissionStatus.certificateUrl}
+                <button
+                  type="button"
+                  onClick={() => navigate(submissionStatus.certificateUrl)}
                   className="bg-candle px-5 py-2.5 text-center text-xs font-semibold uppercase tracking-[0.2em] text-undertaker-black transition-all duration-200 hover:brightness-110"
                 >
                   View Death Certificate
-                </a>
+                </button>
                 <button
                   onClick={() => setSubmissionStatus(undefined)}
                   className="border border-stone px-5 py-2.5 text-xs uppercase tracking-[0.2em] text-ash transition-colors duration-200 hover:border-candle hover:text-bone"
@@ -276,7 +293,7 @@ export function PreservePanel() {
 
                 <button
                   type="submit"
-                  disabled={isUploading || !selectedFile}
+                  disabled={isUploading || !selectedFile || cooldownRemaining > 0}
                   className="w-full bg-candle py-3 text-xs font-semibold uppercase tracking-[0.25em] text-undertaker-black transition-all hover:brightness-110 disabled:opacity-50"
                 >
                   {isUploading ? (
@@ -284,6 +301,8 @@ export function PreservePanel() {
                       <span className="size-3 animate-spin rounded-full border border-undertaker-black border-t-transparent" />
                       Archiving to Filecoin... {uploadProgress ?? 0}%
                     </span>
+                  ) : cooldownRemaining > 0 ? (
+                    `Please wait ${cooldownRemaining}s...`
                   ) : (
                     'Create Death Certificate'
                   )}
