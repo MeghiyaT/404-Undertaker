@@ -10,7 +10,7 @@ export function SiteNav() {
         <a
           href="/"
           aria-label="404 Undertaker home"
-          className="group flex min-w-0 items-center gap-3 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-candle rounded-sm"
+          className="group flex min-w-0 items-center gap-3 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-candle"
         >
           <span className="grid size-9 place-items-center border border-candle/30 bg-grave text-sm font-semibold text-candle transition-all duration-undertaker ease-undertaker group-hover:border-candle/80 group-hover:bg-candle/5">
             404
@@ -25,7 +25,7 @@ export function SiteNav() {
               <li key={link.href}>
                 <a
                   href={link.href}
-                  className="px-2 py-2 text-sm text-ash transition-colors duration-undertaker ease-undertaker hover:text-bone focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-candle rounded-sm sm:px-3"
+                  className="px-2 py-2 text-sm text-ash transition-colors duration-undertaker ease-undertaker hover:text-bone focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-candle sm:px-3"
                 >
                   {link.label}
                 </a>

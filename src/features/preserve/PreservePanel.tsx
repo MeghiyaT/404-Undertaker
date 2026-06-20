@@ -6,7 +6,7 @@ import { uploadEvidenceToFilecoin } from '../../shared/services/filecoinStorage'
 const fieldStyles =
   'mt-2 w-full border border-stone bg-undertaker-black/80 px-4 py-3 text-base text-bone outline-none transition-colors placeholder:text-ash/55 focus:border-candle'
 
-const labelStyles = 'text-sm font-medium text-bone'
+const labelStyles = 'text-xs font-medium uppercase tracking-[0.3em] text-ash sm:text-sm'
 
 type SubmissionStatus =
   | {
@@ -127,13 +127,13 @@ export function PreservePanel() {
   return (
     <section
       id="preserve"
-      className="border-y border-stone py-12 sm:grid sm:grid-cols-[0.8fr_1.2fr] sm:gap-12 sm:py-16"
+      className="border-t border-stone pt-16 sm:grid sm:grid-cols-[0.8fr_1.2fr] sm:gap-12 sm:pt-24"
     >
       <div>
         <p className="text-xs uppercase tracking-[0.3em] text-candle sm:text-sm">
           Preserve
         </p>
-        <h2 className="mt-4 max-w-[20rem] text-2xl font-semibold leading-tight text-bone sm:max-w-none sm:text-3xl">
+        <h2 className="mt-4 max-w-[20rem] text-3xl font-semibold leading-tight text-bone sm:max-w-none sm:text-4xl">
           Prepare a clean record before the trail goes cold.
         </h2>
       </div>
@@ -239,7 +239,7 @@ export function PreservePanel() {
         <button
           type="submit"
           disabled={isUploading || !selectedFile}
-          className="mt-2 relative overflow-hidden border border-candle bg-candle px-5 py-3 text-sm font-semibold text-undertaker-black transition-colors hover:bg-bone focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-candle disabled:cursor-not-allowed disabled:border-stone disabled:bg-stone disabled:text-ash"
+          className="mt-2 relative overflow-hidden border border-candle bg-candle px-5 py-3 text-sm font-semibold text-undertaker-black transition-colors hover:bg-bone hover:animate-flicker focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-candle disabled:cursor-not-allowed disabled:border-stone disabled:bg-stone disabled:text-ash disabled:hover:animate-none"
         >
           {isUploading && uploadProgress !== null && (
             <div

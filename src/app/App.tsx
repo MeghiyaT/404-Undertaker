@@ -19,15 +19,15 @@ export function App() {
         {certificateId ? (
           <CertificatePage certificateId={certificateId} />
         ) : (
-          <main className="flex flex-1 flex-col gap-20 pb-16 pt-14 sm:gap-24 sm:pt-20">
+          <main className="flex flex-1 flex-col gap-16 py-16 sm:gap-24 sm:py-24">
             <section className="max-w-3xl">
               <p className="mb-4 text-xs uppercase tracking-[0.3em] text-candle sm:text-sm">
                 Memento mori for the web
               </p>
-              <h1 className="text-4xl font-semibold leading-tight text-bone sm:text-7xl">
+              <h1 className="text-4xl font-semibold leading-tight text-bone sm:text-6xl">
                 404 Undertaker
               </h1>
-              <p className="mt-6 max-w-[20rem] text-base leading-7 text-ash sm:max-w-2xl sm:text-lg sm:leading-8">
+              <p className="mt-6 max-w-[20rem] text-base leading-relaxed text-ash sm:max-w-2xl sm:text-lg sm:leading-8">
                 Preserve what fails. Archive what fades. Keep every vanished
                 path marked with a quiet record.
               </p>

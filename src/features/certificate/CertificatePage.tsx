@@ -82,27 +82,30 @@ export function CertificatePage({ certificateId }: CertificatePageProps) {
   }
 
   return (
-    <main className="flex flex-1 justify-center px-4 pb-16 pt-10 sm:px-0 sm:pt-16">
+    <main className="flex flex-1 justify-center px-4 py-16 sm:px-0 sm:py-24">
       <article className="w-full max-w-4xl certificate-engraved bg-[#13110F] shadow-2xl relative p-3 sm:p-5">
         <div className="certificate-seal h-full w-full bg-grave/40">
           <header className="border-b border-stone/60 px-6 py-12 text-center sm:px-12">
-            <div className="mx-auto mb-6 flex h-12 w-12 items-center justify-center border border-candle/30 rounded-full">
-              <span className="text-candle/80 font-serif italic text-lg">X</span>
+            <div className="mx-auto mb-6 flex h-12 w-12 items-center justify-center border border-candle/30 bg-candle/5 rotate-45">
+              <span className="text-candle/80 font-serif italic text-lg -rotate-45">X</span>
             </div>
-            <p className="text-xs uppercase tracking-[0.4em] text-candle">
+            <p className="text-xs uppercase tracking-[0.3em] text-candle sm:text-sm">
               404 Undertaker
             </p>
-            <h1 className="mt-6 text-4xl font-serif font-medium tracking-wide text-bone sm:text-6xl">
+            <h1 className="mt-6 text-4xl font-serif font-medium leading-tight text-bone sm:text-6xl">
               Death Certificate
             </h1>
-            <p className="mt-5 text-sm uppercase tracking-[0.3em] text-ash/80">
+            <p className="mt-5 text-xs uppercase tracking-[0.3em] text-ash/80 sm:text-sm">
               For a departed web link
             </p>
           </header>
 
           <section className="grid gap-0 sm:grid-cols-[1fr_1.5fr]">
-          <div className="border-b border-stone p-6 sm:border-b-0 sm:border-r sm:p-8">
-            <p className="text-xs uppercase tracking-[0.3em] text-candle">
+          <div className="relative border-b border-stone p-6 sm:border-b-0 sm:border-r sm:p-8">
+            <div className="absolute right-6 top-6 flex h-8 w-8 items-center justify-center border border-candle/30 bg-candle/5 rotate-45 opacity-60">
+              <span className="font-serif text-[10px] text-candle -rotate-45">†</span>
+            </div>
+            <p className="text-xs uppercase tracking-[0.3em] text-candle pr-10 sm:text-sm">
               Certificate ID
             </p>
             <p className="mt-4 break-all font-mono text-sm leading-6 text-ash">
@@ -112,7 +115,7 @@ export function CertificatePage({ certificateId }: CertificatePageProps) {
 
           <dl className="divide-y divide-stone/60">
             <div className="grid gap-2 p-6 sm:grid-cols-[11rem_1fr] sm:p-8 hover:bg-white/[0.01] transition-colors">
-              <dt className="text-sm font-medium uppercase tracking-wider text-ash/70">Original URL</dt>
+              <dt className="text-xs font-medium uppercase tracking-[0.3em] text-ash/70 sm:text-sm">Original URL</dt>
               <dd className="break-words font-mono text-sm leading-6 text-bone">
                 <a href={certificate.originalUrl} target="_blank" rel="noopener noreferrer" className="hover:text-candle transition-colors underline decoration-stone underline-offset-4">
                   {certificate.originalUrl}
@@ -121,14 +124,14 @@ export function CertificatePage({ certificateId }: CertificatePageProps) {
             </div>
 
             <div className="grid gap-2 p-6 sm:grid-cols-[11rem_1fr] sm:p-8 hover:bg-white/[0.01] transition-colors">
-              <dt className="text-sm font-medium uppercase tracking-wider text-ash/70">Title</dt>
+              <dt className="text-xs font-medium uppercase tracking-[0.3em] text-ash/70 sm:text-sm">Title</dt>
               <dd className="text-lg font-serif text-bone">
                 {certificate.title || 'Untitled record'}
               </dd>
             </div>
 
             <div className="grid gap-2 p-6 sm:grid-cols-[11rem_1fr] sm:p-8 hover:bg-white/[0.01] transition-colors">
-              <dt className="text-sm font-medium uppercase tracking-wider text-ash/70">
+              <dt className="text-xs font-medium uppercase tracking-[0.3em] text-ash/70 sm:text-sm">
                 Preservation Note
               </dt>
               <dd className="whitespace-pre-wrap text-base leading-relaxed text-ash/90 italic border-l-2 border-stone pl-4">
@@ -137,14 +140,14 @@ export function CertificatePage({ certificateId }: CertificatePageProps) {
             </div>
 
             <div className="grid gap-2 p-6 sm:grid-cols-[11rem_1fr] sm:p-8 hover:bg-white/[0.01] transition-colors">
-              <dt className="text-sm font-medium uppercase tracking-wider text-ash/70">Timestamp</dt>
+              <dt className="text-xs font-medium uppercase tracking-[0.3em] text-ash/70 sm:text-sm">Timestamp</dt>
               <dd className="text-sm tracking-wide text-bone">
                 {formatTimestamp(certificate.timestamp)}
               </dd>
             </div>
 
             <div className="grid gap-2 p-6 sm:grid-cols-[11rem_1fr] sm:p-8 hover:bg-white/[0.01] transition-colors">
-              <dt className="text-sm font-medium uppercase tracking-wider text-ash/70">Filecoin CID</dt>
+              <dt className="text-xs font-medium uppercase tracking-[0.3em] text-ash/70 sm:text-sm">Filecoin CID</dt>
               <dd className="break-all font-mono text-sm leading-6 text-candle/80 bg-candle/5 px-2 py-1 inline-block border border-candle/10">
                 {certificate.filecoinCid}
               </dd>
@@ -161,7 +164,7 @@ export function CertificatePage({ certificateId }: CertificatePageProps) {
             type="button"
             onClick={handleRetrieveEvidence}
             disabled={isRetrieving}
-            className="border border-candle bg-candle px-5 py-3 text-sm font-semibold text-undertaker-black transition-colors hover:bg-bone focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-candle disabled:cursor-not-allowed disabled:border-stone disabled:bg-stone disabled:text-ash"
+            className="border border-candle bg-candle px-5 py-3 text-sm font-semibold text-undertaker-black transition-colors hover:bg-bone hover:animate-flicker focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-candle disabled:cursor-not-allowed disabled:border-stone disabled:bg-stone disabled:text-ash disabled:hover:animate-none"
           >
             {isRetrieving ? 'Retrieving Evidence...' : 'Retrieve Evidence'}
           </button>
