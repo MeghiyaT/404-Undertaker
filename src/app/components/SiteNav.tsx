@@ -1,39 +1,98 @@
+import { useState } from 'react'
+
 const links = [
   { label: 'Preserve', href: '/#preserve' },
   { label: 'Archive', href: '/#archive' },
 ]
 
 export function SiteNav() {
+  const [menuOpen, setMenuOpen] = useState(false)
+
   return (
-    <header className="sticky top-0 z-20 min-w-0 border-b border-stone/80 bg-undertaker-black/85 py-4 backdrop-blur transition-colors duration-undertaker ease-undertaker">
-      <div className="flex items-center justify-start gap-4 sm:justify-between">
-        <a
-          href="/"
-          aria-label="404 Undertaker home"
-          className="group flex min-w-0 items-center gap-3 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-candle"
-        >
-          <span className="grid size-9 place-items-center border border-candle/30 bg-grave text-sm font-semibold text-candle transition-all duration-undertaker ease-undertaker group-hover:border-candle/80 group-hover:bg-candle/5">
-            404
-          </span>
-          <span className="truncate text-base font-medium text-bone transition-opacity duration-undertaker ease-undertaker group-hover:opacity-80">
+    <nav className="sticky top-0 z-50 border-b border-stone bg-undertaker-black">
+      <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-6">
+        {/* Wordmark */}
+        <a href="/" className="flex items-center gap-3 no-underline">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center border border-candle">
+            <span className="font-mono text-[10px] font-semibold leading-none tracking-tighter text-candle">
+              404
+            </span>
+          </div>
+          <span className="text-sm font-semibold uppercase tracking-[0.15em] text-bone">
             Undertaker
           </span>
         </a>
-        <nav aria-label="Primary navigation" className="shrink-0">
-          <ul className="flex items-center gap-1 sm:gap-2">
-            {links.map((link) => (
-              <li key={link.href}>
-                <a
-                  href={link.href}
-                  className="px-2 py-2 text-sm text-ash transition-colors duration-undertaker ease-undertaker hover:text-bone focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-candle sm:px-3"
-                >
-                  {link.label}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </nav>
+
+        {/* Desktop nav links */}
+        <div className="hidden items-center gap-8 sm:flex">
+          {links.map(({ label, href }) => (
+            <a
+              key={label}
+              href={href}
+              className="text-xs uppercase tracking-[0.2em] text-ash transition-colors duration-200 hover:text-candle"
+              onClick={(e) => {
+                const url = new URL(href, window.location.href)
+                if (url.pathname === window.location.pathname && url.hash) {
+                  e.preventDefault()
+                  document.querySelector(url.hash)?.scrollIntoView({ behavior: 'smooth' })
+                }
+              }}
+            >
+              {label}
+            </a>
+          ))}
+        </div>
+
+        {/* Mobile hamburger */}
+        <button
+          className="flex flex-col gap-1.5 p-2 sm:hidden"
+          onClick={() => setMenuOpen((v) => !v)}
+          aria-label="Toggle menu"
+        >
+          {menuOpen
+            ? [0, 1, 2].map((i) => (
+                <span
+                  key={i}
+                  className="block h-px w-5 bg-candle"
+                  style={{
+                    transform:
+                      i === 0
+                        ? 'translateY(8px) rotate(45deg)'
+                        : i === 2
+                          ? 'translateY(-8px) rotate(-45deg)'
+                          : 'scale(0)',
+                    transition: 'transform 0.2s',
+                  }}
+                />
+              ))
+            : [0, 1, 2].map((i) => (
+                <span key={i} className="block h-px w-5 bg-ash" />
+              ))}
+        </button>
       </div>
-    </header>
+
+      {/* Mobile menu */}
+      {menuOpen && (
+        <div className="flex flex-col gap-4 border-t border-stone px-6 py-4 sm:hidden">
+          {links.map(({ label, href }) => (
+            <a
+              key={label}
+              href={href}
+              className="text-left text-xs uppercase tracking-[0.2em] text-ash transition-colors duration-200 hover:text-candle"
+              onClick={(e) => {
+                const url = new URL(href, window.location.href)
+                if (url.pathname === window.location.pathname && url.hash) {
+                  e.preventDefault()
+                  document.querySelector(url.hash)?.scrollIntoView({ behavior: 'smooth' })
+                }
+                setMenuOpen(false)
+              }}
+            >
+              {label}
+            </a>
+          ))}
+        </div>
+      )}
+    </nav>
   )
 }

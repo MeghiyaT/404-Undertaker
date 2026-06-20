@@ -9,11 +9,7 @@ type CertificatePageProps = {
 
 function formatTimestamp(timestamp: string) {
   const date = new Date(timestamp)
-
-  if (Number.isNaN(date.getTime())) {
-    return timestamp
-  }
-
+  if (Number.isNaN(date.getTime())) return timestamp
   return new Intl.DateTimeFormat(undefined, {
     dateStyle: 'long',
     timeStyle: 'short',
@@ -31,12 +27,8 @@ export function CertificatePage({ certificateId }: CertificatePageProps) {
   }, [certificateId])
 
   async function handleRetrieveEvidence() {
-    if (!certificate) {
-      return
-    }
-
+    if (!certificate) return
     setIsRetrieving(true)
-
     try {
       await retrieveEvidenceFromFilecoin(certificate.filecoinCid)
     } catch (error) {
@@ -48,33 +40,31 @@ export function CertificatePage({ certificateId }: CertificatePageProps) {
 
   if (!hasLoaded) {
     return (
-      <main className="flex flex-1 items-center justify-center py-20">
-        <p className="text-sm uppercase tracking-[0.3em] text-candle">
-          Summoning record
-        </p>
+      <main className="flex min-h-screen items-center justify-center bg-undertaker-black">
+        <p className="text-xs uppercase tracking-[0.3em] text-candle">Summoning record...</p>
       </main>
     )
   }
 
   if (!certificate) {
     return (
-      <main className="flex flex-1 items-center justify-center py-20">
-        <section className="w-full max-w-2xl border border-stone bg-grave/70 p-8 text-center">
-          <p className="text-sm uppercase tracking-[0.3em] text-candle">
-            Certificate not found
+      <main className="flex min-h-screen items-center justify-center bg-undertaker-black px-6">
+        <section className="w-full max-w-2xl border border-stone bg-grave p-10 text-center">
+          <p className="text-xs font-medium uppercase tracking-[0.3em] text-[#8B2020]">
+            Record not found
           </p>
-          <h1 className="mt-4 text-3xl font-semibold text-bone">
-            No record rests under this ID.
+          <h1 className="mt-5 text-3xl font-semibold text-bone">
+            This certificate does not exist in this browser.
           </h1>
-          <p className="mt-4 text-base leading-7 text-ash">
-            This MVP stores certificates in your browser localStorage, so the
-            record must be opened from the same browser that created it.
+          <p className="mt-6 leading-relaxed text-ash">
+            This MVP stores certificates in your local storage. You must open
+            this link from the same browser that created it.
           </p>
           <a
             href="/#preserve"
-            className="mt-8 inline-flex border border-candle px-5 py-3 text-sm font-semibold text-candle transition-colors hover:bg-candle hover:text-undertaker-black"
+            className="mt-8 inline-block bg-candle px-6 py-3 text-xs font-semibold uppercase tracking-[0.2em] text-undertaker-black transition-all hover:brightness-110"
           >
-            Preserve a Link
+            Return to Surface
           </a>
         </section>
       </main>
@@ -82,95 +72,115 @@ export function CertificatePage({ certificateId }: CertificatePageProps) {
   }
 
   return (
-    <main className="flex flex-1 justify-center px-4 py-16 sm:px-0 sm:py-24">
-      <article className="w-full max-w-4xl certificate-engraved bg-[#13110F] shadow-2xl relative p-3 sm:p-5">
-        <div className="certificate-seal h-full w-full bg-grave/40">
-          <header className="border-b border-stone/60 px-6 py-12 text-center sm:px-12">
-            <div className="mx-auto mb-6 flex h-12 w-12 items-center justify-center border border-candle/30 bg-candle/5 rotate-45">
-              <span className="text-candle/80 font-serif italic text-lg -rotate-45">X</span>
+    <main className="min-h-screen bg-undertaker-black px-6 pb-32">
+      {/* Return Nav inside the page since the old one isn't sticky here if rendered standalone, but wait App renders Nav */}
+      <div className="mx-auto mt-16 max-w-4xl border border-stone bg-grave p-2 lg:p-4">
+        {/* Double rule border wrapper */}
+        <div 
+          className="relative h-full border border-stone p-8 lg:p-12"
+          style={{ boxShadow: "inset 0 0 0 1px rgba(45,41,37,0.55)" }}
+        >
+          {/* Header */}
+          <div className="relative border-b border-stone pb-12 text-center">
+            {/* Top decorative lines */}
+            <div className="absolute left-1/2 top-0 h-8 w-px -translate-x-1/2 bg-stone" />
+            <div className="absolute left-0 top-8 h-px w-full bg-stone" />
+            
+            <div className="relative mx-auto mt-12 flex size-12 items-center justify-center border border-candle bg-[#0F0D0B]">
+              <span className="font-mono text-[10px] font-semibold tracking-tighter text-candle">404</span>
             </div>
-            <p className="text-xs uppercase tracking-[0.3em] text-candle sm:text-sm">
-              404 Undertaker
-            </p>
-            <h1 className="mt-6 text-4xl font-serif font-medium leading-tight text-bone sm:text-6xl">
+            
+            <h1 className="mt-8 text-4xl font-semibold tracking-tight text-bone md:text-5xl">
               Death Certificate
             </h1>
-            <p className="mt-5 text-xs uppercase tracking-[0.3em] text-ash/80 sm:text-sm">
-              For a departed web link
-            </p>
-          </header>
-
-          <section className="grid gap-0 sm:grid-cols-[1fr_1.5fr]">
-          <div className="relative border-b border-stone p-6 sm:border-b-0 sm:border-r sm:p-8">
-            <div className="absolute right-6 top-6 flex h-8 w-8 items-center justify-center border border-candle/30 bg-candle/5 rotate-45 opacity-60">
-              <span className="font-serif text-[10px] text-candle -rotate-45">†</span>
-            </div>
-            <p className="text-xs uppercase tracking-[0.3em] text-candle pr-10 sm:text-sm">
-              Certificate ID
-            </p>
-            <p className="mt-4 break-all font-mono text-sm leading-6 text-ash">
-              {certificate.id}
+            <p className="mt-4 text-xs font-medium uppercase tracking-[0.3em] text-[#6B6560]">
+              Record of a Departed Web Page
             </p>
           </div>
 
-          <dl className="divide-y divide-stone/60">
-            <div className="grid gap-2 p-6 sm:grid-cols-[11rem_1fr] sm:p-8 hover:bg-white/[0.01] transition-colors">
-              <dt className="text-xs font-medium uppercase tracking-[0.3em] text-ash/70 sm:text-sm">Original URL</dt>
-              <dd className="break-words font-mono text-sm leading-6 text-bone">
-                <a href={certificate.originalUrl} target="_blank" rel="noopener noreferrer" className="hover:text-candle transition-colors underline decoration-stone underline-offset-4">
+          {/* Content Body */}
+          <div className="grid grid-cols-1 lg:grid-cols-[240px_1fr]">
+            {/* Left Column (Seal & Status) */}
+            <div className="border-b border-stone lg:border-b-0 lg:border-r">
+              <div className="flex flex-col items-center border-b border-stone py-12">
+                <svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="60" cy="60" r="59" stroke="#2D2925" strokeWidth="2"/>
+                  <circle cx="60" cy="60" r="54" stroke="#2D2925" strokeDasharray="4 4"/>
+                  <circle cx="60" cy="60" r="44" stroke="#D8B96D" strokeWidth="1"/>
+                  <circle cx="60" cy="60" r="30" fill="#090807" stroke="#D8B96D" strokeWidth="2"/>
+                  <path d="M60 10V20M60 100V110M10 60H20M100 60H110" stroke="#2D2925" strokeWidth="2"/>
+                  <text x="60" y="56" fill="#D8B96D" fontSize="14" fontFamily="monospace" fontWeight="bold" textAnchor="middle">404</text>
+                  <text x="60" y="74" fill="#D8B96D" fontSize="8" letterSpacing="0.2em" fontFamily="sans-serif" textAnchor="middle">VERIFIED</text>
+                </svg>
+              </div>
+              <div className="p-6">
+                <p className="text-[10px] uppercase tracking-[0.2em] text-[#6B6560]">Status</p>
+                <p className="mt-2 font-mono text-sm text-bone">Permanently Archived</p>
+              </div>
+              <div className="border-t border-stone p-6">
+                <p className="text-[10px] uppercase tracking-[0.2em] text-[#6B6560]">Evidence</p>
+                <p className="mt-2 font-mono text-xs text-ash">IPFS Distributed</p>
+                <button
+                  type="button"
+                  onClick={handleRetrieveEvidence}
+                  disabled={isRetrieving}
+                  className="mt-6 block w-full border border-candle py-3 text-center text-xs font-semibold uppercase tracking-[0.2em] text-candle transition-colors hover:bg-candle hover:text-undertaker-black disabled:opacity-50"
+                >
+                  {isRetrieving ? 'Retrieving...' : 'Retrieve'}
+                </button>
+              </div>
+            </div>
+
+            {/* Right Column (Details) */}
+            <div className="divide-y divide-stone">
+              <div className="p-6 lg:p-8">
+                <p className="text-[10px] uppercase tracking-[0.2em] text-[#6B6560]">Certificate ID</p>
+                <p className="mt-2 font-mono text-sm text-bone">{certificate.id}</p>
+              </div>
+              
+              <div className="p-6 lg:p-8">
+                <p className="text-[10px] uppercase tracking-[0.2em] text-[#6B6560]">Original URL</p>
+                <a 
+                  href={certificate.originalUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-2 block break-all font-mono text-sm text-candle transition-colors hover:text-bone"
+                >
                   {certificate.originalUrl}
                 </a>
-              </dd>
-            </div>
+              </div>
 
-            <div className="grid gap-2 p-6 sm:grid-cols-[11rem_1fr] sm:p-8 hover:bg-white/[0.01] transition-colors">
-              <dt className="text-xs font-medium uppercase tracking-[0.3em] text-ash/70 sm:text-sm">Title</dt>
-              <dd className="text-lg font-serif text-bone">
-                {certificate.title || 'Untitled record'}
-              </dd>
-            </div>
+              <div className="p-6 lg:p-8">
+                <p className="text-[10px] uppercase tracking-[0.2em] text-[#6B6560]">Page Title</p>
+                <p className="mt-2 text-lg font-medium text-bone">{certificate.title || 'Untitled record'}</p>
+              </div>
 
-            <div className="grid gap-2 p-6 sm:grid-cols-[11rem_1fr] sm:p-8 hover:bg-white/[0.01] transition-colors">
-              <dt className="text-xs font-medium uppercase tracking-[0.3em] text-ash/70 sm:text-sm">
-                Preservation Note
-              </dt>
-              <dd className="whitespace-pre-wrap text-base leading-relaxed text-ash/90 italic border-l-2 border-stone pl-4">
-                {certificate.note || 'No note entered.'}
-              </dd>
-            </div>
+              <div className="p-6 lg:p-8">
+                <p className="text-[10px] uppercase tracking-[0.2em] text-[#6B6560]">Preservation Note</p>
+                <p className="mt-3 leading-relaxed text-ash">{certificate.note || 'No note entered.'}</p>
+              </div>
 
-            <div className="grid gap-2 p-6 sm:grid-cols-[11rem_1fr] sm:p-8 hover:bg-white/[0.01] transition-colors">
-              <dt className="text-xs font-medium uppercase tracking-[0.3em] text-ash/70 sm:text-sm">Timestamp</dt>
-              <dd className="text-sm tracking-wide text-bone">
-                {formatTimestamp(certificate.timestamp)}
-              </dd>
+              <div className="grid grid-cols-1 sm:grid-cols-2 divide-y sm:divide-y-0 sm:divide-x divide-stone">
+                <div className="p-6 lg:p-8">
+                  <p className="text-[10px] uppercase tracking-[0.2em] text-[#6B6560]">Time of Death (Recorded)</p>
+                  <p className="mt-2 font-mono text-xs text-bone">{formatTimestamp(certificate.timestamp)}</p>
+                </div>
+                <div className="p-6 lg:p-8">
+                  <p className="text-[10px] uppercase tracking-[0.2em] text-[#6B6560]">Filecoin CID</p>
+                  <p className="mt-2 break-all font-mono text-xs text-ash">{certificate.filecoinCid}</p>
+                </div>
+              </div>
             </div>
+          </div>
 
-            <div className="grid gap-2 p-6 sm:grid-cols-[11rem_1fr] sm:p-8 hover:bg-white/[0.01] transition-colors">
-              <dt className="text-xs font-medium uppercase tracking-[0.3em] text-ash/70 sm:text-sm">Filecoin CID</dt>
-              <dd className="break-all font-mono text-sm leading-6 text-candle/80 bg-candle/5 px-2 py-1 inline-block border border-candle/10">
-                {certificate.filecoinCid}
-              </dd>
-            </div>
-          </dl>
-        </section>
-
-        <footer className="flex flex-col gap-5 border-t border-stone/60 px-6 py-8 sm:flex-row sm:items-center sm:justify-between sm:px-10 bg-undertaker-black/20">
-          <p className="max-w-xl text-sm leading-6 text-ash">
-            Evidence is retrieved by CID from the Filecoin-backed IPFS gateway
-            and opened in a new tab.
-          </p>
-          <button
-            type="button"
-            onClick={handleRetrieveEvidence}
-            disabled={isRetrieving}
-            className="border border-candle bg-candle px-5 py-3 text-sm font-semibold text-undertaker-black transition-colors hover:bg-bone hover:animate-flicker focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-candle disabled:cursor-not-allowed disabled:border-stone disabled:bg-stone disabled:text-ash disabled:hover:animate-none"
-          >
-            {isRetrieving ? 'Retrieving Evidence...' : 'Retrieve Evidence'}
-          </button>
-        </footer>
+          {/* Footer Rule */}
+          <div className="mt-12 flex items-center justify-center gap-4 border-t border-stone pt-12">
+            <div className="h-px w-12 bg-stone"></div>
+            <span className="font-mono text-[10px] tracking-[0.3em] text-[#6B6560]">PERMANENT RECORD</span>
+            <div className="h-px w-12 bg-stone"></div>
+          </div>
         </div>
-      </article>
+      </div>
     </main>
   )
 }

@@ -18,52 +18,61 @@ export function ArchivePanel() {
   }, [])
 
   return (
-    <section id="archive" className="border-t border-stone pt-16 sm:pt-24 pb-16 sm:pb-24">
-      <div className="mb-10 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
-        <div>
-          <p className="text-xs uppercase tracking-[0.3em] text-candle sm:text-sm">
-            Archive
-          </p>
-          <h2 className="mt-4 max-w-[20rem] text-3xl font-semibold leading-tight text-bone sm:max-w-none sm:text-4xl">
-            A quiet register for pages that no longer answer.
-          </h2>
-        </div>
-        <p className="max-w-sm text-sm leading-6 text-ash">
-          Each entry keeps the missing path visible without disturbing the
-          still-living parts of the site.
+    <section id="archive" className="mx-auto max-w-6xl px-6 py-24">
+      <div className="mb-12">
+        <p className="text-xs font-medium uppercase tracking-[0.3em] text-candle">
+          Archive
         </p>
+        <h2 className="mt-5 text-3xl font-semibold leading-tight tracking-tight text-bone md:text-4xl">
+          A quiet register for pages that no longer answer.
+        </h2>
       </div>
-      {certificates.length > 0 ? (
-        <div className="grid max-w-[20rem] gap-4 sm:max-w-none sm:grid-cols-2 lg:grid-cols-3">
-          {certificates.map((certificate, index) => (
+
+      {certificates.length === 0 ? (
+        <div className="flex flex-col items-center gap-4 border border-stone bg-grave py-20">
+          <div className="flex size-10 items-center justify-center border border-stone">
+            <span className="font-mono text-sm text-[#6B6560]">ø</span>
+          </div>
+          <p className="text-xs uppercase tracking-[0.2em] text-[#6B6560]">
+            The graveyard is empty.
+          </p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 gap-px border border-stone bg-stone md:grid-cols-2 lg:grid-cols-3">
+          {certificates.map((cert, index) => (
             <a
-              key={certificate.id}
-              href={`/certificate/${certificate.id}`}
-              className="group flex min-h-44 flex-col justify-between border border-stone bg-grave/60 p-5 transition-all duration-undertaker ease-undertaker hover:-translate-y-1 hover:border-candle/80 hover:bg-grave focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-candle animate-fade-in-up"
-              style={{ animationDelay: `${index * 75}ms` }}
+              key={cert.id}
+              href={`/certificate/${cert.id}`}
+              className="group flex h-full min-h-44 flex-col justify-between border-t border-transparent bg-[#0F0D0B] p-6 outline-none transition-all duration-150 animate-fade-in-up hover:border-candle hover:bg-grave focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-candle"
+              style={{ animationDelay: `${index * 60}ms` }}
             >
-              <div>
-                <p className="text-xs uppercase tracking-[0.3em] text-candle transition-opacity duration-undertaker ease-undertaker group-hover:opacity-80 sm:text-sm">
-                  Preserved
-                </p>
-                <h3 className="mt-4 line-clamp-2 text-xl font-semibold leading-tight text-bone transition-colors duration-undertaker ease-undertaker group-hover:text-candle">
-                  {certificate.title || 'Untitled record'}
-                </h3>
+              <div className="flex flex-col gap-4">
+                <div className="flex items-start justify-between gap-4">
+                  <span className="text-[10px] font-medium uppercase tracking-[0.25em] text-candle">
+                    Preserved
+                  </span>
+                  <span className="font-mono text-[10px] text-[#6B6560]">
+                    {cert.id}
+                  </span>
+                </div>
+
+                <div>
+                  <p className="text-sm font-medium leading-snug text-bone">
+                    {cert.title || 'Untitled record'}
+                  </p>
+                  {cert.note && (
+                    <p className="mt-2 line-clamp-2 text-xs leading-relaxed text-[#6B6560]">
+                      {cert.note}
+                    </p>
+                  )}
+                </div>
               </div>
-              <p className="mt-6 line-clamp-2 break-words font-mono text-sm leading-6 text-ash transition-colors duration-undertaker ease-undertaker group-hover:text-bone">
-                {certificate.originalUrl || 'No original URL recorded'}
+
+              <p className="mt-6 truncate font-mono text-[10px] leading-relaxed text-[#6B6560]">
+                {cert.originalUrl || 'No original URL recorded'}
               </p>
             </a>
           ))}
-        </div>
-      ) : (
-        <div className="max-w-[20rem] border border-stone border-dashed bg-grave/30 px-5 py-12 text-center sm:max-w-none transition-colors duration-undertaker ease-undertaker hover:border-ash/50">
-          <p className="text-sm uppercase tracking-widest text-ash">
-            The graveyard is empty
-          </p>
-          <p className="mt-2 text-sm text-ash/60">
-            No broken links have been preserved yet.
-          </p>
         </div>
       )}
     </section>

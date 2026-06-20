@@ -4,26 +4,18 @@ import { saveMetadataBundle } from '../../shared/services/certificateStorage'
 import { uploadEvidenceToFilecoin } from '../../shared/services/filecoinStorage'
 
 const fieldStyles =
-  'mt-2 w-full border border-stone bg-undertaker-black/80 px-4 py-3 text-base text-bone outline-none transition-colors placeholder:text-ash/55 focus:border-candle'
+  'w-full px-3 py-2.5 text-sm border border-stone bg-transparent outline-none transition-colors duration-150 focus:border-candle placeholder-[#6B6560] text-bone font-mono text-xs'
 
-const labelStyles = 'text-xs font-medium uppercase tracking-[0.3em] text-ash sm:text-sm'
+const labelStyles = 'block text-xs tracking-[0.15em] uppercase mb-2 text-[#6B6560]'
 
 type SubmissionStatus =
-  | {
-      kind: 'success'
-      message: string
-      certificateUrl: string
-    }
-  | {
-      kind: 'error'
-      message: string
-    }
+  | { kind: 'success'; message: string; certificateUrl: string }
+  | { kind: 'error'; message: string }
 
 export function PreservePanel() {
   const [isUploading, setIsUploading] = useState(false)
   const [uploadProgress, setUploadProgress] = useState<number | null>(null)
-  const [submissionStatus, setSubmissionStatus] =
-    useState<SubmissionStatus>()
+  const [submissionStatus, setSubmissionStatus] = useState<SubmissionStatus>()
   const [isDragOver, setIsDragOver] = useState(false)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -42,28 +34,20 @@ export function PreservePanel() {
     event.preventDefault()
     setIsDragOver(false)
     const file = event.dataTransfer.files?.[0]
-    if (file) {
-      setSelectedFile(file)
-    }
+    if (file) setSelectedFile(file)
   }
 
   function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0]
-    if (file) {
-      setSelectedFile(file)
-    }
+    if (file) setSelectedFile(file)
   }
 
   function clearFile() {
     setSelectedFile(null)
-    if (fileInputRef.current) {
-      fileInputRef.current.value = ''
-    }
+    if (fileInputRef.current) fileInputRef.current.value = ''
   }
 
-  async function handleCreateDeathCertificate(
-    event: FormEvent<HTMLFormElement>,
-  ) {
+  async function handleCreateDeathCertificate(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     setSubmissionStatus(undefined)
 
@@ -89,33 +73,18 @@ export function PreservePanel() {
     try {
       const upload = await uploadEvidenceToFilecoin(fileToUpload, setUploadProgress)
       const timestamp = new Date().toISOString()
-      const metadataBundle = {
-        originalUrl,
-        title,
-        note,
-        timestamp,
-        filecoinCid: upload.cid,
-      }
+      const metadataBundle = { originalUrl, title, note, timestamp, filecoinCid: upload.cid }
       const savedCertificate = saveMetadataBundle(metadataBundle)
-      const certificateUrl = `/certificate/${savedCertificate.id}`
-
-      console.log('Evidence uploaded CID:', upload.cid)
-      console.log('Death certificate metadata bundle:', metadataBundle)
-      console.log('Saved certificate:', savedCertificate)
-      console.log('Certificate URL:', certificateUrl)
+      
       setSubmissionStatus({
         kind: 'success',
         message: 'Death certificate saved.',
-        certificateUrl,
+        certificateUrl: `/certificate/${savedCertificate.id}`,
       })
     } catch (error) {
-      console.error('Failed to upload evidence to Filecoin:', error)
       setSubmissionStatus({
         kind: 'error',
-        message:
-          error instanceof Error
-            ? error.message
-            : 'Failed to upload evidence to Filecoin.',
+        message: error instanceof Error ? error.message : 'Failed to upload evidence to Filecoin.',
       })
     } finally {
       setIsUploading(false)
@@ -125,155 +94,205 @@ export function PreservePanel() {
   }
 
   return (
-    <section
-      id="preserve"
-      className="border-t border-stone pt-16 sm:grid sm:grid-cols-[0.8fr_1.2fr] sm:gap-12 sm:pt-24"
-    >
-      <div>
-        <p className="text-xs uppercase tracking-[0.3em] text-candle sm:text-sm">
-          Preserve
-        </p>
-        <h2 className="mt-4 max-w-[20rem] text-3xl font-semibold leading-tight text-bone sm:max-w-none sm:text-4xl">
-          Prepare a clean record before the trail goes cold.
-        </h2>
-      </div>
-      <form
-        onSubmit={handleCreateDeathCertificate}
-        className="mt-8 grid max-w-[20rem] gap-5 border border-stone bg-grave/70 p-5 sm:mt-0 sm:max-w-none sm:p-6"
-      >
+    <section id="preserve" className="mx-auto max-w-6xl px-6 py-24">
+      <div className="grid grid-cols-1 items-start gap-16 lg:grid-cols-2 lg:gap-24">
+        {/* Left column */}
         <div>
-          <label htmlFor="original-url" className={labelStyles}>
-            Original URL
-          </label>
-          <input
-            id="original-url"
-            name="originalUrl"
-            type="url"
-            placeholder="https://example.com/lost-page"
-            required
-            className={fieldStyles}
-          />
+          <p className="text-xs font-medium uppercase tracking-[0.3em] text-candle">Preserve</p>
+          <h2 className="mt-5 text-3xl font-semibold leading-tight tracking-tight text-bone md:text-4xl">
+            Prepare a clean record before the trail goes cold.
+          </h2>
+          <p className="mt-6 leading-relaxed text-ash">
+            Every broken link was once a living page. Submit the original URL,
+            attach a screenshot or archived copy, and we will issue a formal
+            Death Certificate — timestamped and pinned to Filecoin for
+            permanent retrieval.
+          </p>
+
+          <div className="mt-10 flex flex-col gap-5">
+            {[
+              ['01', 'Submit the vanished URL and any context you have.'],
+              ['02', 'Upload a screenshot, HTML export, or other evidence.'],
+              ['03', 'Receive a permanent Certificate with a Filecoin CID.'],
+            ].map(([num, text]) => (
+              <div key={num} className="flex items-start gap-4">
+                <span className="shrink-0 pt-0.5 font-mono text-xs text-candle">
+                  {num}
+                </span>
+                <p className="text-sm leading-relaxed text-ash">{text}</p>
+              </div>
+            ))}
+          </div>
         </div>
 
-        <div>
-          <label htmlFor="title" className={labelStyles}>
-            Title
-          </label>
-          <input
-            id="title"
-            name="title"
-            type="text"
-            placeholder="Last known page title"
-            required
-            className={fieldStyles}
-          />
-        </div>
-
-        <div>
-          <label htmlFor="preservation-note" className={labelStyles}>
-            Preservation Note
-          </label>
-          <textarea
-            id="preservation-note"
-            name="preservationNote"
-            rows={5}
-            placeholder="Record context, provenance, or final observations."
-            required
-            className={`${fieldStyles} resize-y leading-6`}
-          />
-        </div>
-
-        <div>
-          <label htmlFor="evidence-upload" className={labelStyles}>
-            Evidence Upload
-          </label>
-          <div
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
-            onDrop={handleDrop}
-            className={`mt-2 relative border-2 border-dashed p-6 text-center transition-colors duration-undertaker ease-undertaker ${
-              isDragOver
-                ? 'border-candle bg-candle/5'
-                : 'border-stone bg-undertaker-black/80 hover:border-ash/50'
-            }`}
-          >
-            <input
-              id="evidence-upload"
-              name="evidenceUpload"
-              type="file"
-              ref={fileInputRef}
-              onChange={handleFileChange}
-              className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
-              aria-label="Upload evidence file"
-            />
-            {selectedFile ? (
-              <div className="flex flex-col items-center justify-center gap-2">
-                <p className="text-sm font-medium text-bone">
-                  {selectedFile.name}
+        {/* Right column: form card */}
+        <div className="border border-stone bg-grave">
+          {submissionStatus?.kind === 'success' ? (
+            <div className="flex flex-col items-start gap-6 p-8">
+              <div className="flex size-10 items-center justify-center border border-candle">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <path
+                    d="M3 8L6.5 11.5L13 5"
+                    stroke="#D8B96D"
+                    strokeWidth="1.5"
+                    strokeLinecap="square"
+                  />
+                </svg>
+              </div>
+              <div>
+                <p className="text-xs font-medium uppercase tracking-[0.3em] text-candle">
+                  Certificate issued
                 </p>
-                <p className="text-xs text-ash">
-                  {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
+                <p className="mt-3 text-sm leading-relaxed text-ash">
+                  The death certificate has been created and archived to Filecoin.
+                  The record is permanent.
                 </p>
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.preventDefault()
-                    clearFile()
-                  }}
-                  className="mt-2 text-xs uppercase tracking-wider text-candle hover:text-bone focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-candle"
+              </div>
+              <div className="flex w-full flex-col gap-3 sm:flex-row">
+                <a
+                  href={submissionStatus.certificateUrl}
+                  className="bg-candle px-5 py-2.5 text-center text-xs font-semibold uppercase tracking-[0.2em] text-undertaker-black transition-all duration-200 hover:brightness-110"
                 >
-                  Remove
+                  View Death Certificate
+                </a>
+                <button
+                  onClick={() => setSubmissionStatus(undefined)}
+                  className="border border-stone px-5 py-2.5 text-xs uppercase tracking-[0.2em] text-ash transition-colors duration-200 hover:border-candle hover:text-bone"
+                >
+                  Preserve Another
                 </button>
               </div>
-            ) : (
-              <div className="pointer-events-none flex flex-col items-center justify-center gap-2">
-                <p className="text-sm text-ash">
-                  Drag and drop a file, or click to browse
+            </div>
+          ) : (
+            <form onSubmit={handleCreateDeathCertificate} noValidate>
+              <div className="border-b border-stone px-6 py-5">
+                <p className="text-xs font-medium uppercase tracking-[0.3em] text-candle">
+                  New Record
                 </p>
-                <p className="text-xs text-ash/60">Any file up to 100MB</p>
               </div>
-            )}
-          </div>
-        </div>
 
-        <button
-          type="submit"
-          disabled={isUploading || !selectedFile}
-          className="mt-2 relative overflow-hidden border border-candle bg-candle px-5 py-3 text-sm font-semibold text-undertaker-black transition-colors hover:bg-bone hover:animate-flicker focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-candle disabled:cursor-not-allowed disabled:border-stone disabled:bg-stone disabled:text-ash disabled:hover:animate-none"
-        >
-          {isUploading && uploadProgress !== null && (
-            <div
-              className="absolute inset-y-0 left-0 bg-undertaker-black/10 transition-all duration-200"
-              style={{ width: `${uploadProgress}%` }}
-            />
+              <div className="flex flex-col gap-5 px-6 py-6">
+                <div>
+                  <label htmlFor="originalUrl" className={labelStyles}>
+                    Original URL
+                  </label>
+                  <input
+                    id="originalUrl"
+                    name="originalUrl"
+                    type="url"
+                    placeholder="https://example.com/lost-page"
+                    required
+                    disabled={isUploading}
+                    className={fieldStyles}
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="title" className={labelStyles}>
+                    Title
+                  </label>
+                  <input
+                    id="title"
+                    name="title"
+                    type="text"
+                    placeholder="Name of the departed page"
+                    required
+                    disabled={isUploading}
+                    className={`${fieldStyles} font-sans text-sm`}
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="preservationNote" className={labelStyles}>
+                    Preservation Note
+                  </label>
+                  <textarea
+                    id="preservationNote"
+                    name="preservationNote"
+                    placeholder="Why this page mattered. What it contained. Who might miss it."
+                    rows={4}
+                    required
+                    disabled={isUploading}
+                    className={`${fieldStyles} resize-none font-sans text-sm leading-relaxed`}
+                  />
+                </div>
+
+                <div>
+                  <label className={labelStyles}>Evidence Upload</label>
+                  <div
+                    onDragOver={handleDragOver}
+                    onDragLeave={handleDragLeave}
+                    onDrop={handleDrop}
+                    onClick={() => fileInputRef.current?.click()}
+                    className={`cursor-pointer border border-dashed p-6 text-center transition-colors duration-150 ${
+                      isDragOver
+                        ? 'border-candle bg-candle/5'
+                        : 'border-stone bg-transparent hover:border-ash/50'
+                    }`}
+                  >
+                    <input
+                      id="evidenceUpload"
+                      name="evidenceUpload"
+                      type="file"
+                      ref={fileInputRef}
+                      onChange={handleFileChange}
+                      className="hidden"
+                      aria-label="Upload evidence file"
+                    />
+                    {selectedFile ? (
+                      <div className="flex items-center justify-center gap-2">
+                        <span className="font-mono text-xs text-candle">
+                          {selectedFile.name}
+                        </span>
+                        <button
+                          type="button"
+                          className="text-xs text-[#6B6560] hover:text-bone"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            clearFile()
+                          }}
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    ) : (
+                      <>
+                        <p className="text-xs text-[#6B6560]">
+                          Drop a screenshot, HTML, or PDF
+                        </p>
+                        <p className="mt-1 text-xs text-stone">or click to browse</p>
+                      </>
+                    )}
+                  </div>
+                </div>
+
+                {submissionStatus?.kind === 'error' && (
+                  <div className="border border-[#8B2020] px-4 py-3">
+                    <p className="text-xs text-[#8B2020]">
+                      {submissionStatus.message}
+                    </p>
+                  </div>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={isUploading || !selectedFile}
+                  className="w-full bg-candle py-3 text-xs font-semibold uppercase tracking-[0.25em] text-undertaker-black transition-all hover:brightness-110 disabled:opacity-50"
+                >
+                  {isUploading ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <span className="size-3 animate-spin rounded-full border border-undertaker-black border-t-transparent" />
+                      Archiving to Filecoin... {uploadProgress ?? 0}%
+                    </span>
+                  ) : (
+                    'Create Death Certificate'
+                  )}
+                </button>
+              </div>
+            </form>
           )}
-          <span className="relative z-10">
-            {isUploading
-              ? `Uploading Evidence... ${uploadProgress ?? 0}%`
-              : 'Create Death Certificate'}
-          </span>
-        </button>
-        {submissionStatus ? (
-          <div
-            aria-live="polite"
-            className={`border px-4 py-3 text-sm leading-6 ${
-              submissionStatus.kind === 'success'
-                ? 'border-candle/60 bg-candle/10 text-bone'
-                : 'border-stone bg-undertaker-black/70 text-ash'
-            }`}
-          >
-            <p>{submissionStatus.message}</p>
-            {submissionStatus.kind === 'success' ? (
-              <a
-                href={submissionStatus.certificateUrl}
-                className="mt-2 inline-flex font-semibold text-candle hover:text-bone"
-              >
-                View Death Certificate
-              </a>
-            ) : null}
-          </div>
-        ) : null}
-      </form>
+        </div>
+      </div>
     </section>
   )
 }
