@@ -5,6 +5,8 @@ import {
   onSavedCertificatesUpdated,
 } from '../../shared/services/certificateStorage'
 
+const STAGGER_DELAY_MS = 60
+
 export function ArchivePanel() {
   const [certificates, setCertificates] = useState<SavedCertificate[]>([])
 
@@ -31,9 +33,9 @@ export function ArchivePanel() {
       {certificates.length === 0 ? (
         <div className="flex flex-col items-center gap-4 border border-stone bg-grave py-20">
           <div className="flex size-10 items-center justify-center border border-stone">
-            <span className="font-mono text-sm text-[#6B6560]">ø</span>
+            <span className="font-mono text-sm text-dust">ø</span>
           </div>
-          <p className="text-xs uppercase tracking-[0.2em] text-[#6B6560]">
+          <p className="text-xs uppercase tracking-[0.2em] text-dust">
             The graveyard is empty.
           </p>
         </div>
@@ -43,15 +45,15 @@ export function ArchivePanel() {
             <a
               key={cert.id}
               href={`/certificate/${cert.id}`}
-              className="group flex h-full min-h-44 flex-col justify-between border-t border-transparent bg-[#0F0D0B] p-6 outline-none transition-all duration-150 animate-fade-in-up hover:border-candle hover:bg-grave focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-candle"
-              style={{ animationDelay: `${index * 60}ms` }}
+              className="group flex h-full min-h-44 flex-col justify-between border-t border-transparent bg-crypt p-6 outline-none transition-all duration-150 animate-fade-in-up hover:border-candle hover:bg-grave focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-candle"
+              style={{ animationDelay: `${index * STAGGER_DELAY_MS}ms` }}
             >
               <div className="flex flex-col gap-4">
                 <div className="flex items-start justify-between gap-4">
                   <span className="text-[10px] font-medium uppercase tracking-[0.25em] text-candle">
                     Preserved
                   </span>
-                  <span className="font-mono text-[10px] text-[#6B6560]">
+                  <span className="font-mono text-[10px] text-dust">
                     {cert.id}
                   </span>
                 </div>
@@ -61,14 +63,14 @@ export function ArchivePanel() {
                     {cert.title || 'Untitled record'}
                   </p>
                   {cert.note && (
-                    <p className="mt-2 line-clamp-2 text-xs leading-relaxed text-[#6B6560]">
+                    <p className="mt-2 line-clamp-2 text-xs leading-relaxed text-dust">
                       {cert.note}
                     </p>
                   )}
                 </div>
               </div>
 
-              <p className="mt-6 truncate font-mono text-[10px] leading-relaxed text-[#6B6560]">
+              <p className="mt-6 truncate font-mono text-[10px] leading-relaxed text-dust">
                 {cert.originalUrl || 'No original URL recorded'}
               </p>
             </a>

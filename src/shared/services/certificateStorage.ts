@@ -15,13 +15,16 @@ const certificateKeyPrefix = '404-undertaker:certificate'
 const certificatesUpdatedEvent = '404-undertaker:certificates-updated'
 
 function createCertificateId() {
-  const id = globalThis.crypto?.randomUUID?.()
-
-  if (id) {
-    return id
+  if (globalThis.crypto?.randomUUID) {
+    return globalThis.crypto.randomUUID()
   }
 
-  return `certificate-${Date.now()}-${Math.random().toString(16).slice(2)}`
+  // Fallback: crypto.getRandomValues is available in more environments than
+  // randomUUID and produces cryptographically strong random bytes.
+  const bytes = new Uint8Array(16)
+  globalThis.crypto.getRandomValues(bytes)
+  const hex = Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('')
+  return `certificate-${Date.now()}-${hex}`
 }
 
 function getCertificateKey(id: string) {
@@ -77,14 +80,22 @@ export function saveMetadataBundle(
   const savedCertificate = { ...bundle, id }
   const certificateIds = readCertificateIds()
 
-  localStorage.setItem(
-    getCertificateKey(id),
-    JSON.stringify(savedCertificate),
-  )
-  localStorage.setItem(
-    certificateIndexKey,
-    JSON.stringify([...certificateIds, id]),
-  )
+  try {
+    localStorage.setItem(
+      getCertificateKey(id),
+      JSON.stringify(savedCertificate),
+    )
+    localStorage.setItem(
+      certificateIndexKey,
+      JSON.stringify([...certificateIds, id]),
+    )
+  } catch {
+    throw new Error(
+      `Failed to save certificate locally (browser storage may be full). ` +
+        `Your evidence was uploaded to Filecoin with CID: ${bundle.filecoinCid} — please save this CID manually.`,
+    )
+  }
+
   window.dispatchEvent(new CustomEvent(certificatesUpdatedEvent))
 
   return savedCertificate

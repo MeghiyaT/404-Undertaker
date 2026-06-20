@@ -4,9 +4,9 @@ import { saveMetadataBundle } from '../../shared/services/certificateStorage'
 import { uploadEvidenceToFilecoin } from '../../shared/services/filecoinStorage'
 
 const fieldStyles =
-  'w-full px-3 py-2.5 text-sm border border-stone bg-transparent outline-none transition-colors duration-150 focus:border-candle placeholder-[#6B6560] text-bone font-mono text-xs'
+  'w-full px-3 py-2.5 text-sm border border-stone bg-transparent outline-none transition-colors duration-150 focus:border-candle placeholder-dust text-bone font-mono text-xs'
 
-const labelStyles = 'block text-xs tracking-[0.15em] uppercase mb-2 text-[#6B6560]'
+const labelStyles = 'block text-xs tracking-[0.15em] uppercase mb-2 text-dust'
 
 type SubmissionStatus =
   | { kind: 'success'; message: string; certificateUrl: string }
@@ -246,7 +246,7 @@ export function PreservePanel() {
                         </span>
                         <button
                           type="button"
-                          className="text-xs text-[#6B6560] hover:text-bone"
+                          className="text-xs text-dust hover:text-bone"
                           onClick={(e) => {
                             e.stopPropagation()
                             clearFile()
@@ -257,7 +257,7 @@ export function PreservePanel() {
                       </div>
                     ) : (
                       <>
-                        <p className="text-xs text-[#6B6560]">
+                        <p className="text-xs text-dust">
                           Drop a screenshot, HTML, or PDF
                         </p>
                         <p className="mt-1 text-xs text-stone">or click to browse</p>
@@ -267,8 +267,8 @@ export function PreservePanel() {
                 </div>
 
                 {submissionStatus?.kind === 'error' && (
-                  <div className="border border-[#8B2020] px-4 py-3">
-                    <p className="text-xs text-[#8B2020]">
+                  <div className="border border-ember px-4 py-3">
+                    <p className="text-xs text-ember">
                       {submissionStatus.message}
                     </p>
                   </div>

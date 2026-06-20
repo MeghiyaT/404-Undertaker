@@ -1,5 +1,4 @@
-import { useEffect, useState } from 'react'
-import type { SavedCertificate } from '../../shared/services/certificateStorage'
+import { useMemo, useState } from 'react'
 import { getSavedCertificateById } from '../../shared/services/certificateStorage'
 import { retrieveEvidenceFromFilecoin } from '../../shared/services/filecoinStorage'
 
@@ -16,15 +15,22 @@ function formatTimestamp(timestamp: string) {
   }).format(date)
 }
 
-export function CertificatePage({ certificateId }: CertificatePageProps) {
-  const [certificate, setCertificate] = useState<SavedCertificate>()
-  const [hasLoaded, setHasLoaded] = useState(false)
-  const [isRetrieving, setIsRetrieving] = useState(false)
+/** Only allow http/https URLs to be rendered as clickable links */
+function isSafeUrl(url: string): boolean {
+  try {
+    const parsed = new URL(url)
+    return parsed.protocol === 'http:' || parsed.protocol === 'https:'
+  } catch {
+    return false
+  }
+}
 
-  useEffect(() => {
-    setCertificate(getSavedCertificateById(certificateId))
-    setHasLoaded(true)
-  }, [certificateId])
+export function CertificatePage({ certificateId }: CertificatePageProps) {
+  const certificate = useMemo(
+    () => getSavedCertificateById(certificateId),
+    [certificateId],
+  )
+  const [isRetrieving, setIsRetrieving] = useState(false)
 
   async function handleRetrieveEvidence() {
     if (!certificate) return
@@ -32,25 +38,20 @@ export function CertificatePage({ certificateId }: CertificatePageProps) {
     try {
       await retrieveEvidenceFromFilecoin(certificate.filecoinCid)
     } catch (error) {
-      console.error('Opened gateway fallback after evidence fetch failed:', error)
+      if (import.meta.env.DEV) {
+        console.error('Opened gateway fallback after evidence fetch failed:', error)
+      }
     } finally {
       setIsRetrieving(false)
     }
   }
 
-  if (!hasLoaded) {
-    return (
-      <main className="flex min-h-screen items-center justify-center bg-undertaker-black">
-        <p className="text-xs uppercase tracking-[0.3em] text-candle">Summoning record...</p>
-      </main>
-    )
-  }
 
   if (!certificate) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-undertaker-black px-6">
         <section className="w-full max-w-2xl border border-stone bg-grave p-10 text-center">
-          <p className="text-xs font-medium uppercase tracking-[0.3em] text-[#8B2020]">
+          <p className="text-xs font-medium uppercase tracking-[0.3em] text-ember">
             Record not found
           </p>
           <h1 className="mt-5 text-3xl font-semibold text-bone">
@@ -86,14 +87,14 @@ export function CertificatePage({ certificateId }: CertificatePageProps) {
             <div className="absolute left-1/2 top-0 h-8 w-px -translate-x-1/2 bg-stone" />
             <div className="absolute left-0 top-8 h-px w-full bg-stone" />
             
-            <div className="relative mx-auto mt-12 flex size-12 items-center justify-center border border-candle bg-[#0F0D0B]">
+            <div className="relative mx-auto mt-12 flex size-12 items-center justify-center border border-candle bg-crypt">
               <span className="font-mono text-[10px] font-semibold tracking-tighter text-candle">404</span>
             </div>
             
             <h1 className="mt-8 text-4xl font-semibold tracking-tight text-bone md:text-5xl">
               Death Certificate
             </h1>
-            <p className="mt-4 text-xs font-medium uppercase tracking-[0.3em] text-[#6B6560]">
+            <p className="mt-4 text-xs font-medium uppercase tracking-[0.3em] text-dust">
               Record of a Departed Web Page
             </p>
           </div>
@@ -114,11 +115,11 @@ export function CertificatePage({ certificateId }: CertificatePageProps) {
                 </svg>
               </div>
               <div className="p-6">
-                <p className="text-[10px] uppercase tracking-[0.2em] text-[#6B6560]">Status</p>
+                <p className="text-[10px] uppercase tracking-[0.2em] text-dust">Status</p>
                 <p className="mt-2 font-mono text-sm text-bone">Permanently Archived</p>
               </div>
               <div className="border-t border-stone p-6">
-                <p className="text-[10px] uppercase tracking-[0.2em] text-[#6B6560]">Evidence</p>
+                <p className="text-[10px] uppercase tracking-[0.2em] text-dust">Evidence</p>
                 <p className="mt-2 font-mono text-xs text-ash">IPFS Distributed</p>
                 <button
                   type="button"
@@ -134,39 +135,45 @@ export function CertificatePage({ certificateId }: CertificatePageProps) {
             {/* Right Column (Details) */}
             <div className="divide-y divide-stone">
               <div className="p-6 lg:p-8">
-                <p className="text-[10px] uppercase tracking-[0.2em] text-[#6B6560]">Certificate ID</p>
+                <p className="text-[10px] uppercase tracking-[0.2em] text-dust">Certificate ID</p>
                 <p className="mt-2 font-mono text-sm text-bone">{certificate.id}</p>
               </div>
               
               <div className="p-6 lg:p-8">
-                <p className="text-[10px] uppercase tracking-[0.2em] text-[#6B6560]">Original URL</p>
-                <a 
-                  href={certificate.originalUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-2 block break-all font-mono text-sm text-candle transition-colors hover:text-bone"
-                >
-                  {certificate.originalUrl}
-                </a>
+                <p className="text-[10px] uppercase tracking-[0.2em] text-dust">Original URL</p>
+                {isSafeUrl(certificate.originalUrl) ? (
+                  <a 
+                    href={certificate.originalUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-2 block break-all font-mono text-sm text-candle transition-colors hover:text-bone"
+                  >
+                    {certificate.originalUrl}
+                  </a>
+                ) : (
+                  <span className="mt-2 block break-all font-mono text-sm text-ash">
+                    {certificate.originalUrl}
+                  </span>
+                )}
               </div>
 
               <div className="p-6 lg:p-8">
-                <p className="text-[10px] uppercase tracking-[0.2em] text-[#6B6560]">Page Title</p>
+                <p className="text-[10px] uppercase tracking-[0.2em] text-dust">Page Title</p>
                 <p className="mt-2 text-lg font-medium text-bone">{certificate.title || 'Untitled record'}</p>
               </div>
 
               <div className="p-6 lg:p-8">
-                <p className="text-[10px] uppercase tracking-[0.2em] text-[#6B6560]">Preservation Note</p>
+                <p className="text-[10px] uppercase tracking-[0.2em] text-dust">Preservation Note</p>
                 <p className="mt-3 leading-relaxed text-ash">{certificate.note || 'No note entered.'}</p>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 divide-y sm:divide-y-0 sm:divide-x divide-stone">
                 <div className="p-6 lg:p-8">
-                  <p className="text-[10px] uppercase tracking-[0.2em] text-[#6B6560]">Time of Death (Recorded)</p>
+                  <p className="text-[10px] uppercase tracking-[0.2em] text-dust">Time of Death (Recorded)</p>
                   <p className="mt-2 font-mono text-xs text-bone">{formatTimestamp(certificate.timestamp)}</p>
                 </div>
                 <div className="p-6 lg:p-8">
-                  <p className="text-[10px] uppercase tracking-[0.2em] text-[#6B6560]">Filecoin CID</p>
+                  <p className="text-[10px] uppercase tracking-[0.2em] text-dust">Filecoin CID</p>
                   <p className="mt-2 break-all font-mono text-xs text-ash">{certificate.filecoinCid}</p>
                 </div>
               </div>
@@ -176,7 +183,7 @@ export function CertificatePage({ certificateId }: CertificatePageProps) {
           {/* Footer Rule */}
           <div className="mt-12 flex items-center justify-center gap-4 border-t border-stone pt-12">
             <div className="h-px w-12 bg-stone"></div>
-            <span className="font-mono text-[10px] tracking-[0.3em] text-[#6B6560]">PERMANENT RECORD</span>
+            <span className="font-mono text-[10px] tracking-[0.3em] text-dust">PERMANENT RECORD</span>
             <div className="h-px w-12 bg-stone"></div>
           </div>
         </div>
